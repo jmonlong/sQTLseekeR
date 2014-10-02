@@ -22,6 +22,7 @@
 ##' \item{pv}{the P-value}
 ##' \item{nb.perms}{the number of permutation used for the P-value computation}
 ##' @author Jean Monlong
+##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,svQTL=FALSE,approx=TRUE){
 
     ## Debugging twilight zone

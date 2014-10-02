@@ -16,6 +16,7 @@
 ##' @return a data.frame with the relative transcript expression for the
 ##' genes to study.
 ##' @author Jean Monlong
+##' @export
 prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, min.dispersion=.1){
     samples = setdiff(colnames(te.df), c("chr","start","end","geneId","trId"))
     trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
