@@ -6,7 +6,7 @@
 ##' @author Jean Monlong
 ##' @export
 indexGenotype <- function(file){
-    Rsamtools::bgzip(file, overwrite=TRUE)
-    Rsamtools::indexTabix(paste0(file,".bgz"), format="bed")
-    return(paste0(file,".bgz"))
+    file.final = Rsamtools::bgzip(file, overwrite=TRUE)
+    Rsamtools::indexTabix(file.final, format="bed")
+    return(file.final)
 }
