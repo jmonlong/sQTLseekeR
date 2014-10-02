@@ -1,0 +1,18 @@
+Package: sQTLseekeR
+Type: Package
+Title: Splicing QTL discovery tool
+Version: 1.0
+Date: 2013-04-25
+Author: Jean Monlong, Miquel Calvo, Roderic Guigo.
+Maintainer: Jean Monlong <jean.monlong@gmail.com>
+Description: Association study between genotypic information and transcript
+    relative expression from RNASeq, using a distance-based non-parametric
+    MANOVA approach.
+License: GPL-2
+Imports:
+    vegan,
+    Rsamtools,
+    dplyr,
+    GenomicRanges,
+    IRanges,
+    permute
