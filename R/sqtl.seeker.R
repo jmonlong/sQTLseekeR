@@ -25,10 +25,6 @@
 ##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,svQTL=FALSE,approx=TRUE){
 
-    ## Debugging twilight zone
-    MIN.NB.IND.GP = 5
-    ##
-
     ## Check if:
     ## - less than 3 missing genotype values
     ## - more than 5 samples per genotype group
@@ -47,30 +43,32 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     }
         
     analyze.gene.f <- function(tre.gene){
+      cat(tre.gene$geneId[1],"\n")
         ## Load genotype
         gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
             GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
         gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
         genotype.gene = read.bedix(genotype.f, gr.gene)
+      cat(nrow(genotype.gene),"\n")
         
-        samp.int = intersect(colnames(genotype.gene)[-(1:2)], colnames(tre.df)[-(1:2)])
         if(nrow(genotype.gene)>0){
-            ## Remove samples with non expressed genes
-            tre.gene = tre.gene[,!is.na(tre.gene[1,])]
-            ## Focus on common samples
-            com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
-            ## Filter SNP with not enough power
-            snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+          ## Remove samples with non expressed genes
+          tre.gene = tre.gene[,!is.na(tre.gene[1,])]
+          ## Focus on common samples
+          com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
+          ## Filter SNP with not enough power
+          snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+          if(any(snps.to.keep)){
             genotype.gene = genotype.gene[snps.to.keep, ]
-
+            
             tre.dist = hellingerDist(tre.gene[,com.samples])
             res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene))
             res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist))
             return(res.df)
-        } else {
-            return(data.frame())
+          }
         }
-    }
+        return(data.frame())
+      }
     
     dplyr::do(dplyr::group_by(tre.df, geneId), analyze.gene.f(.))
 }

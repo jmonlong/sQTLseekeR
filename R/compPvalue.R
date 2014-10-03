@@ -11,9 +11,9 @@
 ##' @return an updated data.frame with new columns 'pv' and 'nb.perms'.
 ##' @author Jean Monlong
 ##' @keywords internal
-compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6, svQTL, approx){
+compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6, svQTL=FALSE, approx=TRUE){
 
-    perm.F = compute.null(max(res.df$F),tre.dist,res.df$nb.groups,min.nb.ext.scores,nb.perm.max,svQTL=svQTL,approx=approx)
+    perm.F = compute.null(max(res.df$F),tre.dist,res.df$nb.groups[1],min.nb.ext.scores,nb.perm.max,svQTL=svQTL,approx=approx)
     res.df$nb.perms = perm.F$nbP.tot
 
     compute.pv <- function(F,F.perms){

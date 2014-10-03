@@ -12,7 +12,6 @@
 ##' @return a data.frame with the retrieved BED information.
 ##' @author Jean Monlong
 read.bedix <- function(file,subset, col.names=NULL, as.is=TRUE){
-    ##library(Rsamtools)
 
     if(is.data.frame(subset)){
         subset = with(subset, GenomicRanges::GRanges(chr, IRanges(start, end)))
@@ -20,12 +19,14 @@ read.bedix <- function(file,subset, col.names=NULL, as.is=TRUE){
         stop("'subset' must be a data.frame or a GRanges object.")
     }
 
-    bed = Rsamtools::scanTabix(file,param=subset)
-    ncol = length(strsplit(bed[[1]],"\t")[[1]])
-    bed.df = matrix(unlist(lapply(bed, strsplit, "\t")), length(bed), ncol, byrow=TRUE)
+    bed = unlist(Rsamtools::scanTabix(file,param=subset))
+    ncol = length(strsplit(bed[1],"\t")[[1]])
+    bed.df = matrix(unlist(strsplit(bed,"\t")), length(bed), ncol, byrow=TRUE)
     bed.df = as.data.frame(bed.df, stringsAsFactors=FALSE)
     if(!is.null(col.names)){
         colnames(bed.df) = col.names
+    } else {
+      colnames(bed.df) = as.character(read.table(file, nrow=1, as.is=TRUE))
     }
     for(ii in 1:ncol(bed.df)) bed.df[,ii] = type.convert(bed.df[,ii], as.is=as.is)
     
