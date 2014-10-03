@@ -44,12 +44,12 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         
     analyze.gene.f <- function(tre.gene){
       cat(tre.gene$geneId[1],"\n")
-        ## Load genotype
-        gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
-            GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
-        gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
+      ## Load genotype
+      gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
+        GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
+      gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
+      if(length(gr.gene)>0){
         genotype.gene = read.bedix(genotype.f, gr.gene)
-      cat(nrow(genotype.gene),"\n")
         
         if(nrow(genotype.gene)>0){
           ## Remove samples with non expressed genes
@@ -67,8 +67,9 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             return(res.df)
           }
         }
-        return(data.frame())
       }
+    }
+    return(data.frame())
     
     dplyr::do(dplyr::group_by(tre.df, geneId), analyze.gene.f(.))
 }

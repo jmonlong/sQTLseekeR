@@ -12,17 +12,20 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
-    geno.snp = geno.df[,labels(tre.dist)]
-    if(any(geno.snp==-1)){
-        geno.snp[geno.snp==-1] = NA
-    }
-    groups.snp.f = factor(as.numeric(geno.snp))
-    F.snp = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=svQTL)
-    mdt = md.trans(tre.df, groups.snp.f, labels(tre.dist))
-    data.frame(F=F.snp,
-               nb.groups=nlevels(groups.snp.f) ,
-               md=mdt$md,
-               tr.first=mdt$tr.first,
-               tr.second=mdt$tr.second,
-               stringsAsFactors=FALSE)
+  cat(geno.df$snpId,"\n")
+  geno.snp = geno.df[,labels(tre.dist)]
+  if(any(geno.snp==-1)){
+    non.na = geno.snp==-1
+    geno.snp = geno.snp[non.na]
+    tre.dist = as.dist(as.matrix(tre.dist)[non.na, non.na])
+  }
+  groups.snp.f = factor(as.numeric(geno.snp))
+  F.snp = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=svQTL)
+  mdt = md.trans(tre.df, groups.snp.f, labels(tre.dist))
+  data.frame(F=F.snp,
+             nb.groups=nlevels(groups.snp.f) ,
+             md=mdt$md,
+             tr.first=mdt$tr.first,
+             tr.second=mdt$tr.second,
+             stringsAsFactors=FALSE)
 }
