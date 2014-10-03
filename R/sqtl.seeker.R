@@ -68,7 +68,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist))
             return(res.df)
         } else {
-            return(NULL)
+            return(data.frame())
         }
     }
     

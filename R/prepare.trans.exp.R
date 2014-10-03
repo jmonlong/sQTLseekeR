@@ -30,8 +30,9 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
         disp = te.dispersion(hellingerDist(df[,samples]))
         if(disp > min.dispersion){
             return(df)
-        } else {
-            return(NULL)
+
+          } else {
+            return(data.frame())
         }
     }
     
