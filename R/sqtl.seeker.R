@@ -11,7 +11,9 @@
 ##' @param min.nb.ext.scores the minimum number of permuted score higher than
 ##' 'F.lead' to allow the computation to stop. Default is 1000.
 ##' @param nb.perm.max the maximum number of permutations. Default is 1e6.
-##' @param svQTL should svQTL test be performed instead of sQTL. Default is FALSE.
+##' @param svQTL should svQTLs test be performed in addition to sQTLs. Default is FALSE. Warning:
+##' computation of svQTLs cannot rely on asymptotic approximation, hence the heavy permutations will
+##' considerably increase the running time. 
 ##' @param approx should the asymptotic distribution be used instead of permutations.
 ##' Default is TRUE.
 ##' @return a data.frame with columns
@@ -62,8 +64,11 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             genotype.gene = genotype.gene[snps.to.keep, ]
             
             tre.dist = hellingerDist(tre.gene[,com.samples])
-            res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene))
-            res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist))
+            res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
+            res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx))
+            if(svQTL){
+                res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, svQTL=TRUE))
+            }
             return(res.df)
           }
         }

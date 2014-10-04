@@ -3,7 +3,7 @@
 ##' @param geno.df a data.frame of one row with the genotype information for each sample.
 ##' @param tre.dist a distance object from the transcript relative expression.
 ##' @param tre.df a data.frame with the transcript relative expression. 
-##' @param svQTL should svQTL test be performed instead of sQTL. Default is FALSE.
+##' @param svQTL should svQTL test be performed in addition to sQTL. Default is FALSE.
 ##' @return a data.frame with columns:
 ##' \item{F}{the F score.}
 ##' \item{nb.groups}{the number of groups created by the genotypes.}
@@ -20,12 +20,16 @@ compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
     tre.dist = as.dist(as.matrix(tre.dist)[non.na, non.na])
   }
   groups.snp.f = factor(as.numeric(geno.snp))
-  F.snp = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=svQTL)
+  F.snp = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=FALSE)
   mdt = md.trans(tre.df, groups.snp.f, labels(tre.dist))
-  data.frame(F=F.snp,
-             nb.groups=nlevels(groups.snp.f) ,
-             md=mdt$md,
-             tr.first=mdt$tr.first,
-             tr.second=mdt$tr.second,
-             stringsAsFactors=FALSE)
+  res.df = data.frame(F=F.snp,
+      nb.groups=nlevels(groups.snp.f) ,
+      md=mdt$md,
+      tr.first=mdt$tr.first,
+      tr.second=mdt$tr.second,
+      stringsAsFactors=FALSE)
+  if(svQTL){
+      res.df$F.svQTL = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=TRUE)
+  }
+  return(res.df)
 }

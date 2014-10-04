@@ -32,7 +32,11 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
         }
         return(pv)
     }
-    
-    res.df$pv = compute.pv(res.df$F,perm.F$FP)
+
+    if(svQTL){
+        res.df$pv.svQTL = compute.pv(res.df$F,perm.F$FP)
+    } else {
+        res.df$pv = compute.pv(res.df$F,perm.F$FP)
+    }
     return(res.df)
 }
