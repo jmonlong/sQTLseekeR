@@ -2,7 +2,8 @@
 ##' expression are removed. Then gene expressing only one transcript
 ##' are removed because not informative for splicing analysis. Finally
 ##' the relative expression of the transcripts is retrieved and genes with
-##' low dispersion are removed.
+##' low dispersion are removed. Also genes with just a few different splicing
+##' patterns are removed as it is not fit for the permutation process.
 ##' @title Transcript expression preparation
 ##' @param te.df a data.frame with the transcript expression. The first
 ##' two columns are the transcript and gene ids, named 'trId' and
@@ -28,11 +29,11 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
     relativize.filter.dispersion <- function(df){
         df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
         disp = te.dispersion(hellingerDist(df[,samples]))
-        if(disp > min.dispersion){
-          return(df)
+        if(disp > min.dispersion & nbDiffPt(df[,samples])>25){
         } else {
-          return(data.frame())
+            return(data.frame())
         }
+        
     }
     
     te.df = dplyr::do(dplyr::group_by(te.df, geneId), relativize.filter.dispersion(.))

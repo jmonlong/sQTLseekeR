@@ -9,11 +9,12 @@ Description: Association study between genotypic information and transcript
     relative expression from RNASeq, using a distance-based non-parametric
     MANOVA approach.
 License: GPL-2
-Imports: 
+Imports:
     vegan,
     Rsamtools,
     dplyr,
     GenomicRanges,
     IRanges,
     permute
-Suggests: testthat
+Suggests:
+    testthat
