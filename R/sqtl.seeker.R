@@ -41,7 +41,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             if(sum(geno.snp.t >= 5) < 2){
                 return(FALSE)
             }
-            nb.diff.pts = sapply(names(geno.snp.t), function(geno.i){
+            nb.diff.pts = sapply(names(geno.snp.t)[geno.snp.t>1], function(geno.i){
                 nbDiffPt(tre.df[,which(geno.snp==geno.i)])
             })
             if(sum(nb.diff.pts >= 5) < 2){
