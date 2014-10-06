@@ -50,4 +50,4 @@ be found in folder `scripts`.
 
 Another important point about `BatchJobs` is the configuration of your computing cluster. An example of the configuration files can be found in the `scripts` folder:
 * If present in the working directory, `.BatchJobs.R` is loaded when the `BatchJobs` package is loaded. It defines which template to use and `BatchJobs` functions. In practice, user just needs to check/replace `qsub`/`qdel`/`qstat` calls with the correct bash commands (sometimes `msub`/`canceljob`/`showq`). Eventually an email address to send log messages.
-* `cluster.tmpl` is a template form of a job bash script that would be send to the cluster. There the correct syntax for the resources or parameters of the cluster are defined.
+* `cluster.tmpl` is a template form of a job bash script that would be send to the cluster. There the correct syntax for the resources or parameters of the cluster are defined. This file should also be in the working directory when `BatchJobs` is loaded.
