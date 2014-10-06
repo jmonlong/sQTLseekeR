@@ -3,3 +3,4 @@
 export(index.genotype)
 export(prepare.trans.exp)
 export(sqtl.seeker)
+export(sqtls)
