@@ -41,14 +41,13 @@ Once the input files are ready, `sqtl.seeker` function will compute the P-values
 `sQTLseekeR` can be used on a cluster using package `BatchJobs`. An example of an analysis using `BatchJobs` can
 be found in folder `scripts`.
 
-`BatchJobs` is a potent package but the basics functionnalities are enough for our purpose. Here is a quick practical summary of `BatchJobs` commands used in the script:
+`BatchJobs` is a potent package but basic functions are enough in our situation. Here is a quick practical summary of `BatchJobs` commands used in the script:
 * `makeRegistry` create a registry used to manipulate jobs for a particular analysis step.
 * `batchMap` adds jobs to a registry. Simply, the user gives a function and a list of parameters. One job per parameter will be created to compute the output of the function using this specific parameter.
-* `submitJobs` submits the jobs to the cluster. This is where the queue, ,maximum computation time, number of core can be specified. Moreover, if needed, a subset of the jobs can be sent to the cluster. Functions `findNotDone` and `findErrors` are particularly useful to find which jobs that didn't finish or were lost in the limbo of the cluster managment process.
+* `submitJobs` submits the jobs to the cluster. This is where the queue, ,maximum computation time, number of core can be specified. Moreover, if needed, a subset of the jobs can be sent to the cluster. Functions `findNotDone` and `findErrors` are particularly useful to find which jobs that didn't finish or were lost in the limbo of the cluster management process.
 * `showStatus` outputs the status of the computations.
 * `loadResult` retrieve the output of one specific job, while `reduceResultsList` retrieve output for all jobs in a list format.
 
 Another important point about `BatchJobs` is the configuration of your computing cluster. An example of the configuration files can be found in the `scripts` folder:
-* If present in the working directory, `.BatchJobs.R` is loaded when the `BatchJobs` package is loaded. It defines which template to use and eventually an email address to send log messages.
-* `crg-cluster.tmpl` is a template form of a job that would be send to the cluster. There the correct syntax for the resources or parameters of the cluster are defined.
-* `makeClusterFunctionsAdaptive.r` defines the transition from the template job and `BatchJobs` functions. In practice, user just needs to check/replace `qsub`/`qdel`/`qstat` calls with the correct bash commands (sometimes `msub`/`canceljob`/`showq`).
+* If present in the working directory, `.BatchJobs.R` is loaded when the `BatchJobs` package is loaded. It defines which template to use and `BatchJobs` functions. In practice, user just needs to check/replace `qsub`/`qdel`/`qstat` calls with the correct bash commands (sometimes `msub`/`canceljob`/`showq`). Eventually an email address to send log messages.
+* `cluster.tmpl` is a template form of a job bash script that would be send to the cluster. There the correct syntax for the resources or parameters of the cluster are defined.
