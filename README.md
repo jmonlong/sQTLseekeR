@@ -1,7 +1,7 @@
 sQTLseekeR
 ==========
 
-sQTLseekeR is a R package to detect spicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Splicing patterns are modeled by the relative expression of the transcriptsof a gene.
+sQTLseekeR is a R package to detect spicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Splicing patterns are modeled by the relative expression of the transcripts of a gene.
 
 For more information about the method and performance see article :
 Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun. 
@@ -30,10 +30,10 @@ When all input files are correctly formatted the `sQTLseekeR` prepares the data 
   * flag samples with low gene expression.
 * `index.genotype` compresses and indexes the genotype file to optimize further accession of particular regions.
 
-Once the imput files are ready, `sqtl.seeker` function will compute the P-values for each pair of gene/SNP testing the association between the genotype and transcript relative expression. Here is a quick description of the parameters that would most likely be tweaked:
+Once the input files are ready, `sqtl.seeker` function will compute the P-values for each pair of gene/SNP testing the association between the genotype and transcript relative expression. Here is a quick description of the parameters that would most likely be tweaked:
 * `genic.window` the window(bp) around the gene in which the SNPs are tested. Default is 5000 (i.e. 5kb).
-* `svQTL` should svQTLs test be performed in addition to sQTLs (default is FALSE). svQTLs are used to identify potential false positive among the significant sQTLs. svQTLs represents situtation where the variance in transcript relative expression is different between genotype groups. In this particular situation identification of sQTLs is less robust as we assume homogenetiy of the variance between groups, hence it might be safer to remove svQTLs from the list of reported sQTLs. However computation of svQTLs cannot rely on an asymptotic approximation, hence the heavy permutations will considerably increase the running time. 
-* `nb.perm.max` the maximum number of permutation/simulation to compute the P-value. The higher this number, the lower the P-values can potentially get but the longer the computatio (especially relevant when `svQTL=TRUE`).
+* `svQTL` should svQTLs test be performed in addition to sQTLs (default is FALSE). svQTLs are used to identify potential false positive among the significant sQTLs. svQTLs represents situation where the variance in transcript relative expression is different between genotype groups. In this particular situation identification of sQTLs is less robust as we assume homogeneity of the variance between groups, hence it might be safer to remove svQTLs from the list of reported sQTLs. However computation of svQTLs cannot rely on an asymptotic approximation, hence the heavy permutations will considerably increase the running time. 
+* `nb.perm.max` the maximum number of permutation/simulation to compute the P-value. The higher this number, the lower the P-values can potentially get but the longer the computation (especially relevant when `svQTL=TRUE`).
 
 
 ### Running on computing clusters
