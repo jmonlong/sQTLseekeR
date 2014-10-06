@@ -1,19 +1,18 @@
 sQTLseekeR
 ==========
 
-sQTLseekeR is a R package to detect spicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Splicing patterns are modeled by the relative expression of the transcripts of a gene.
+sQTLseekeR is a R package to detect spicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Splicing patterns are modeled by the relative expression of the transcriptsof a gene.
 
 For more information about the method and performance see article :
 Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun. 
 5:4698 doi: [10.1038/ncomms5698](http://www.nature.com/ncomms/2014/140820/ncomms5698/full/ncomms5698.html) (2014).
 
-[TOC]
-
 ### Installation
 
 To install the latest development version: `devtools::install_github("jmonlong/sQTLseekeR")`. 
 
-This requires `devtools` package (more information [here](https://github.com/hadley/devtools)) which can be installed with `install.packages("devtools")`. 
+This requires `devtools` package (more information [here](https://github.com/hadley/devtools)) 
+which can be installed with `install.packages("devtools")`. 
 
 ### Analysis steps
 
