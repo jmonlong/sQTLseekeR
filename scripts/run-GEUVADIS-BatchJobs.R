@@ -1,14 +1,14 @@
 if(FALSE){ ## To upgrade to the latest version of sQTLseekeR
-  devtools::install_github("jmonlong/sQTLseekeR", args="--library=/nfs/users/rg/jmonlong/R/x86_64-redhat-linux-gnu-library/3.1")
+  devtools::install_github("jmonlong/sQTLseekeR")
 }
 library(BatchJobs)
-library(sQTLseekeR,lib.loc="/nfs/users/rg/jmonlong/R/x86_64-redhat-linux-gnu-library/3.1")
+library(sQTLseekeR)
 
-trans.exp.f = "/users/rg/projects/Geuvadis/quantification/transcript/GD667.TrQuantFlux.GeneENSG.rpkm.noRepl.ProtCod.ourf.sampNames.txt.gz"
-genotype.f = "/users/rg/projects/Geuvadis/Genotypes/snps-Geuvadis.txt"
-gene.bed.f = "/users/rg/jmonlong/Documents/GEUVADISexample/Results/genes.bed.gz"
+trans.exp.f = "GD667.TrQuantFlux.GeneENSG.rpkm.noRepl.ProtCod.ourf.sampNames.txt.gz"
+genotype.f = "snps-Geuvadis.txt"
+gene.bed.f = "genes.bed.gz"
 
-groups = read.table("/users/rg/projects/Geuvadis/info/sample-groups.tsv", header=TRUE, as.is=TRUE)
+groups = read.table("sample-groups.tsv", header=TRUE, as.is=TRUE)
 ceu.samples = subset(groups,group=="CEU")$sample
 
 ## 1) Index the genotype file (if not done externally before)
@@ -18,7 +18,6 @@ batchMap(indexGeno.reg, indexGenotype,genotype.f)
 submitJobs(indexGeno.reg, 1, resources=list(walltime="30:0:0", nodes="1", cores="1",queue="sw"), wait=function(retries) 100, max.retries=10)
 showStatus(indexGeno.reg)
 genotype.indexed.f = loadResult(indexGeno.reg,1)
-genotype.indexed.f = "/users/rg/projects/Geuvadis/Genotypes/snps-Geuvadis.txt.bgz"
 
 ## 2) Prepare transcript expression
 ## system("rm -rf prepTE")
