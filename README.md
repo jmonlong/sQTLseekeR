@@ -12,10 +12,10 @@ To install the latest development version: `devtools::install_github("jmonlong/s
 This requires `devtools` package (more information [here](https://github.com/hadley/devtools)) 
 which can be easily installed with `install.packages("devtools")`. 
 
-### Running in clusters
+### Runningin on computing clusters
 
 `sQTLseekeR` can easily be used on a cluster using package `BatchJobs`. An example of an analysis using `BatchJobs` can
-be found in the folder `scripts`.
+be found in folder `scripts`.
 
 ### Publication
 
