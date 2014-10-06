@@ -26,7 +26,7 @@ prepTE.f <- function(te.file, samples){
     te.df = read.table(te.file, as.is=TRUE, header=TRUE, sep="\t")
     colnames(te.df)[1:2] = c("trId", "geneId")
     te.df = te.df[,c("trId", "geneId", samples)]
-    library(sQTLseekeR,lib.loc="/nfs/users/rg/jmonlong/R/x86_64-redhat-linux-gnu-library/3.1")
+    library(sQTLseekeR)
     prepare.trans.exp(te.df)
 }
 batchMap(prepTE.reg, prepTE.f,trans.exp.f, more.args=list(samples=ceu.samples))
@@ -50,7 +50,7 @@ sQTL.f <- function(chunk.id, imF){
     genes = gene.chunks[[chunk.id]]
     tre.df = subset(tre.df, geneId %in% genes)
     gene.bed = subset(gene.bed, geneId %in% genes)
-    library(sQTLseekeR,lib.loc="/nfs/users/rg/jmonlong/R/x86_64-redhat-linux-gnu-library/3.1")
+    library(sQTLseekeR)
     sqtl.seeker(tre.df, genotype.indexed.f, gene.bed, svQTL=TRUE)
 }
 imF = "sQTL-BJ-temp.RData"
