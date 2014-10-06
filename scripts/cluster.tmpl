@@ -1,0 +1,13 @@
+
+#PBS -N <%= job.name %>
+#PBS -j oe
+## direct streams to our logfile
+#PBS -oe <%= log.file %>
+#PBS -l h_rt=<%= resources$walltime %>
+#PBS -pe smp <%= resources$cores %>
+#PBS -q <%= resources$queue %>
+#PBS -V
+
+## Run R:
+## we merge R output with stdout from PBS, which gets then logged via -o option
+R CMD BATCH --no-save --no-restore "<%= rscript %>" /dev/stdout

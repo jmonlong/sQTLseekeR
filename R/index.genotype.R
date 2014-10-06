@@ -5,7 +5,7 @@
 ##' @return the name of the indexed genotype file.
 ##' @author Jean Monlong
 ##' @export
-indexGenotype <- function(file){
+index.genotype <- function(file){
     file.final = Rsamtools::bgzip(file, dest=paste0(sub(".gz","",file),".bgz"),overwrite=TRUE)
     Rsamtools::indexTabix(file.final, format="bed")
     return(file.final)

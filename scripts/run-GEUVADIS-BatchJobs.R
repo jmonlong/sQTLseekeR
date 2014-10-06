@@ -14,7 +14,7 @@ ceu.samples = subset(groups,group=="CEU")$sample
 ## 1) Index the genotype file (if not done externally before)
 system("rm -rf indexGeno")
 indexGeno.reg <- makeRegistry(id="indexGeno", seed=123, file.dir="indexGeno")
-batchMap(indexGeno.reg, indexGenotype,genotype.f)
+batchMap(indexGeno.reg, index.genotype,genotype.f)
 submitJobs(indexGeno.reg, 1, resources=list(walltime="30:0:0", nodes="1", cores="1",queue="sw"), wait=function(retries) 100, max.retries=10)
 showStatus(indexGeno.reg)
 genotype.indexed.f = loadResult(indexGeno.reg,1)
