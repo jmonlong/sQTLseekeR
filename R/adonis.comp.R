@@ -14,7 +14,7 @@
 adonis.comp <- function(dis,groups,permutations=99,f.perms=FALSE,svQTL=FALSE,approx=TRUE){
     if(svQTL){
         bd <- vegan::betadisper(dis, groups,type="centroid")
-        bd.perm <- permutest.betadisper(bd,control = permute::permControl(nperm = permutations)) 
+        bd.perm <- permutest.betadisper(bd,control = permute::how(nperm = permutations)) 
         if(f.perms){
             return(bd.perm$f.perms)
         } else {

@@ -9,7 +9,7 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 permutest.betadisper <- function(x, pairwise = FALSE,
-                                   control = permute::permControl(nperm = 999), ...)
+                                   control = permute::how(nperm = 999), ...)
 {
     t.statistic <- function(x, y) {
         m <- length(x)

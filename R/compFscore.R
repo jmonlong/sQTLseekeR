@@ -12,7 +12,6 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
-  cat(geno.df$snpId,"\n")
   geno.snp = geno.df[,labels(tre.dist)]
   if(any(geno.snp==-1)){
     non.na = geno.snp==-1
