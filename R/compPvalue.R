@@ -12,9 +12,19 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6, svQTL=FALSE, approx=TRUE){
+    if(svQTL){
+        maxF = max(res.df$F.svQTL)
+    } else {
+        maxF = max(res.df$F)
+    }
+        
+    perm.F = compute.null(maxF,tre.dist,res.df$nb.groups[1],min.nb.ext.scores,nb.perm.max,svQTL=svQTL,approx=approx)
 
-    perm.F = compute.null(max(res.df$F),tre.dist,res.df$nb.groups[1],min.nb.ext.scores,nb.perm.max,svQTL=svQTL,approx=approx)
-    res.df$nb.perms = perm.F$nbP.tot
+    if(svQTL){
+        res.df$nb.perms.svQTL = perm.F$nbP.tot
+    } else {
+        res.df$nb.perms = perm.F$nbP.tot
+    }
 
     compute.pv <- function(F,F.perms){
         if(length(F)>1){
@@ -34,7 +44,7 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
     }
 
     if(svQTL){
-        res.df$pv.svQTL = compute.pv(res.df$F,perm.F$FP)
+        res.df$pv.svQTL = compute.pv(res.df$F.svQTL,perm.F$FP)
     } else {
         res.df$pv = compute.pv(res.df$F,perm.F$FP)
     }
