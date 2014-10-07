@@ -20,6 +20,9 @@ read.bedix <- function(file,subset, col.names=NULL, as.is=TRUE){
     }
 
     bed = unlist(Rsamtools::scanTabix(file,param=subset))
+    if(length(bed)==0){
+        return(NULL)
+    }
     ncol = length(strsplit(bed[1],"\t")[[1]])
     bed.df = matrix(unlist(strsplit(bed,"\t")), length(bed), ncol, byrow=TRUE)
     bed.df = as.data.frame(bed.df, stringsAsFactors=FALSE)
