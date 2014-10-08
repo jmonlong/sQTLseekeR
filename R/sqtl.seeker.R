@@ -11,6 +11,7 @@
 ##' @param min.nb.ext.scores the minimum number of permuted score higher than
 ##' 'F.lead' to allow the computation to stop. Default is 1000.
 ##' @param nb.perm.max the maximum number of permutations. Default is 1e6.
+##' @param nb.perm.max.svQTL the maximum number of permutations for the svQTL computation. Default is 1e5.
 ##' @param svQTL should svQTLs test be performed in addition to sQTLs. Default is FALSE. Warning:
 ##' computation of svQTLs cannot rely on asymptotic approximation, hence the heavy permutations will
 ##' considerably increase the running time. 
@@ -25,7 +26,7 @@
 ##' \item{nb.perms}{the number of permutation used for the P-value computation}
 ##' @author Jean Monlong
 ##' @export
-sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,svQTL=FALSE,approx=TRUE){
+sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e5,svQTL=FALSE,approx=TRUE){
 
     ## Check if:
     ## - less than 3 missing genotype values
@@ -74,7 +75,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                     res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
                     res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
                     if(svQTL){
-                        res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
+                        res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
                     }
                     return(res.df)
                 }

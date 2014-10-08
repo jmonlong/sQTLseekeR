@@ -4,8 +4,8 @@
 \title{sQTL seeker}
 \usage{
 sqtl.seeker(tre.df, genotype.f, gene.loc, genic.window = 5000,
-  min.nb.ext.scores = 1000, nb.perm.max = 1e+06, svQTL = FALSE,
-  approx = TRUE)
+  min.nb.ext.scores = 1000, nb.perm.max = 1e+06,
+  nb.perm.max.svQTL = 1e+05, svQTL = FALSE, approx = TRUE)
 }
 \arguments{
 \item{tre.df}{a data.frame with transcript relative expression
@@ -24,6 +24,8 @@ Must have column 'snpId'.}
 'F.lead' to allow the computation to stop. Default is 1000.}
 
 \item{nb.perm.max}{the maximum number of permutations. Default is 1e6.}
+
+\item{nb.perm.max.svQTL}{the maximum number of permutations for the svQTL computation. Default is 1e5.}
 
 \item{svQTL}{should svQTLs test be performed in addition to sQTLs. Default is FALSE. Warning:
 computation of svQTLs cannot rely on asymptotic approximation, hence the heavy permutations will
