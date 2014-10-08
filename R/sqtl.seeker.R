@@ -72,9 +72,9 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                     
                     tre.dist = hellingerDist(tre.gene[,com.samples])
                     res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
-                    res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx))
+                    res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
                     if(svQTL){
-                        res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE))
+                        res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
                     }
                     return(res.df)
                 }
