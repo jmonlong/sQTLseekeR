@@ -44,7 +44,30 @@ a data.frame with columns
 \item{nb.perms}{the number of permutation used for the P-value computation}
 }
 \description{
-Run sQTLseekeR on a set of genes.
+\code{sqtl.seeker} is the main function of \code{sQTLseekeR} package. From transcript relative expression,
+prepared using \code{prepare.trans.exp}, information about the gene location and the path to an ordered genotype
+file, indexed by function \code{index.genotype}, potential association between each SNP and the transcript
+relative expression is tested. Potentially, svQTL, i.e. SNPs affecting splicing variability can also be tested
+to pinpoint potential false sQTL (see Details).
+}
+\details{
+A set of filters is automatically used to remove SNPs which are unpractical or not informative. Precisely, these
+filters remove SNP :
+\itemize{
+\item{with more than 3 unknown genotypes}
+\item{with less than 5 samples in any genotype group}
+\item{with less than 5 different splicing pattern (needed for permutation efficiency) in any genotype group}}
+
+Testing difference in transcript relative expression between genotype groups assumes homogeneity of the variances
+in these groups. Testing this assumption is more complex and computationnally intensive but if needed the user
+can choose to test for svQTL, i.e. gene/SNPs where this assumption is violated, by using the \code{svQTL=TRUE}. This
+test is run in parallel to the sQTL tests, but the copmutation time will be considerably higher. For this reason, another
+parameter can be tweaked, \code{nb.perm.max.svQTL}, to reduce the number of permutation for the svQTL tests if needed for
+feasibility reasons.
+
+DETAILS ON APPROXIMATION
+
+DETAILS ON MD OUTPUT
 }
 \author{
 Jean Monlong

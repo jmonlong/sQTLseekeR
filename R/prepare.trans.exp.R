@@ -2,8 +2,8 @@
 ##' expression are removed. Then gene expressing only one transcript
 ##' are removed because not informative for splicing analysis. Finally
 ##' the relative expression of the transcripts is retrieved and genes with
-##' low dispersion are removed. Also genes with just a few different splicing
-##' patterns are removed as it is not fit for the permutation process.
+##' low dispersion are removed. Also genes with just a few (<25) different splicing
+##' patterns are removed as they don't fit the permutation process.
 ##' @title Transcript expression preparation
 ##' @param te.df a data.frame with the transcript expression. The first
 ##' two columns are the transcript and gene ids, named 'trId' and
