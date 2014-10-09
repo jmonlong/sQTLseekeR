@@ -19,7 +19,8 @@ read.bedix <- function(file,subset, col.names=NULL, as.is=TRUE){
         stop("'subset' must be a data.frame or a GRanges object.")
     }
 
-    bed = unlist(Rsamtools::scanTabix(file,param=subset))
+    bed = tryCatch(unlist(Rsamtools::scanTabix(file,param=subset)),
+        error=function(e)c())
     if(length(bed)==0){
         return(NULL)
     }

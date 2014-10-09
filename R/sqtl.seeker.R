@@ -83,7 +83,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         if(length(gr.gene)>0){
             genotype.gene = read.bedix(genotype.f, gr.gene)
             
-            if(nrow(genotype.gene)>0){
+            if(!is.null(genotype.gene)){
                 ## Remove samples with non expressed genes
                 tre.gene = tre.gene[,!is.na(tre.gene[1,])]
                 ## Focus on common samples
@@ -99,12 +99,19 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                     if(svQTL){
                         res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
                     }
-                    return(res.df)
+                    return(data.frame(done=TRUE,res.df))
                 }
             }
         }
-        return(data.frame())
+        return(data.frame(done=FALSE))
     }
     
-    dplyr::do(dplyr::group_by(tre.df, geneId), analyze.gene.f(.))
+    ret.df = dplyr::do(dplyr::group_by(tre.df, geneId), analyze.gene.f(.))
+    if(any(ret.df$done)){
+        ret.df = subset(ret.df, done)
+        ret.df$done=NULL
+        return(ret.df)
+    } else {
+        return(NULL)
+    }
 }
