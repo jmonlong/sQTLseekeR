@@ -31,7 +31,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE)
     if(!is.null(out.pdf)){
         pdf(out.pdf, 8,6)
         print(ggplot2::ggplot(res.df, ggplot2::aes(x=pv)) +
-              ggplot2::histogram() + ggplot2::theme_bw() +
+              ggplot2::geom_histogram() + ggplot2::theme_bw() +
               ggplot2::xlab("P-value") + ggplot2::ylab("number of gene/SNP")
               )
     }
@@ -41,7 +41,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE)
     if(!is.null(out.pdf)){
         if(nrow(res.df)>0){
             print(ggplot2::ggplot(res.df, ggplot2::aes(y=-log10(pv),x=md)) +
-                  ggplot2::point() + ggplot2::theme_bw() +
+                  ggplot2::geom_bin2d(bins=100) + ggplot2::theme_bw() +
                   ggplot2::ylab("-log10(P-value)") + ggplot2::ylab("Relative expression maximum difference")
                   )
         }
