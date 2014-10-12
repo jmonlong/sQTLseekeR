@@ -49,7 +49,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE)
         if(nrow(res.df)>0){
             print(ggplot2::ggplot(res.df, ggplot2::aes(y=-log10(pv),x=md)) +
                   ggplot2::geom_bin2d(bins=100) + ggplot2::theme_bw() +
-                  ggplot2::ylab("P-value") + ggplot2::xlab("Relative expression maximum difference")
+                  ggplot2::ylab("P-value") + ggplot2::xlab("Relative expression maximum difference") + 
                   ggplot2::scale_y_log10()
                   )
         }
