@@ -24,7 +24,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE)
     if(any(colnames(res.df)=="pv.svQTL")){
         res.df$qv.svQTL = qvalue::qvalue(res.df$pv.svQTL)$qvalues
         if(svQTL.removal){
-            res.df = subset(res.df, qv.svQTL <= FDR)
+            res.df = subset(res.df, qv.svQTL >= FDR)
         }
     }
 
