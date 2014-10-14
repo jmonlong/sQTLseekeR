@@ -25,7 +25,7 @@ makeClusterFunctionsAdaptive <- function (template.file){
     listJobs = function(conf, reg) {
         BatchJobs:::runOSCommandLinux("qstat", "-u $USER")$output
     }
-    getArrayEnvirName = function() "PBS_ARRAYID"
+    getArrayEnvirName = function() "TASKID"
     makeClusterFunctions(name = "Adaptive", submitJob = submitJob,
                          killJob = killJob, listJobs = listJobs, getArrayEnvirName = getArrayEnvirName)
 }
