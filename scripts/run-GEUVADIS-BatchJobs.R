@@ -1,13 +1,16 @@
-if(FALSE){ ## To upgrade to the latest version of sQTLseekeR
-  devtools::install_github("jmonlong/sQTLseekeR")
-}
+##
+## Example of an analysis ran on a computing cluster
+##
+
 library(BatchJobs)
 library(sQTLseekeR)
 
+## Input files: transcript expression, gene location and genotype information
 trans.exp.f = "GD667.TrQuantFlux.GeneENSG.rpkm.noRepl.ProtCod.ourf.sampNames.txt.gz"
-genotype.f = "snps-Geuvadis.txt"
 gene.bed.f = "genes.bed.gz"
+genotype.f = "snps-Geuvadis.txt"
 
+## Getting the IDs of samples in CEU population
 groups = read.table("sample-groups.tsv", header=TRUE, as.is=TRUE)
 ceu.samples = subset(groups,group=="CEU")$sample
 
@@ -15,7 +18,7 @@ ceu.samples = subset(groups,group=="CEU")$sample
 system("rm -rf indexGeno")
 indexGeno.reg <- makeRegistry(id="indexGeno", seed=123, file.dir="indexGeno")
 batchMap(indexGeno.reg, index.genotype,genotype.f)
-submitJobs(indexGeno.reg, 1, resources=list(walltime="30:0:0", nodes="1", cores="1",queue="sw"), wait=function(retries) 100, max.retries=10)
+submitJobs(indexGeno.reg, 1, resources=list(walltime="30:0:0", nodes="1", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
 showStatus(indexGeno.reg)
 genotype.indexed.f = loadResult(indexGeno.reg,1)
 
@@ -30,20 +33,20 @@ prepTE.f <- function(te.file, samples){
     prepare.trans.exp(te.df)
 }
 batchMap(prepTE.reg, prepTE.f,trans.exp.f, more.args=list(samples=ceu.samples))
-submitJobs(prepTE.reg, 1, resources=list(walltime="6:0:0", cores="1",queue="short"), wait=function(retries) 100, max.retries=10)
+submitJobs(prepTE.reg, 1, resources=list(walltime="6:0:0", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
 showStatus(prepTE.reg)
 
 ## 1) and 2) can be run in parallel
 
-## 3) Run sQTLseekeR call
+## 3) Test gene/SNP associations
 ##  system("rm -rf sQTL")
 sQTL.reg <- makeRegistry(id="sQTL", seed=123, file.dir="sQTL")
-#### Eventually this part could be run on an interactive node instead of a login node
+#### Potentially, this part could be run on an interactive node instead of a login node (to be a nice user)
 gene.bed = read.table(gene.bed.f, as.is=TRUE, sep="\t")
 colnames(gene.bed) = c("chr","start","end","geneId")
 tre.df = loadResult(prepTE.reg, 1)
 gene.bed = subset(gene.bed, geneId %in% tre.df$geneId)
-nb.gene.per.chunk = 200
+nb.gene.per.chunk = 30
 gene.chunks = tapply(gene.bed$geneId, rep(1:ceiling(nrow(gene.bed)/nb.gene.per.chunk),each=nb.gene.per.chunk)[1:nrow(gene.bed)], identity)
 sQTL.f <- function(chunk.id, imF){
     load(imF)
@@ -56,18 +59,29 @@ sQTL.f <- function(chunk.id, imF){
 imF = "sQTL-BJ-temp.RData"
 save(gene.chunks,tre.df,genotype.indexed.f, gene.bed, file=imF)
 batchMap(sQTL.reg, sQTL.f, 1:length(gene.chunks), more.args=list(imF=imF))
-#### End of the eventual interactive node part
-submitJobs(sQTL.reg, findNotDone(sQTL.reg), resources=list(walltime="20:0:0", nodes="1", cores="1",queue="sw"), wait=function(retries) 100, max.retries=10)
+#### End of the potential interactive node part
+submitJobs(sQTL.reg, findNotDone(sQTL.reg), resources=list(walltime="20:0:0", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
 showStatus(sQTL.reg)
 
-res.f = "Results/sQTLs-CEU-all.tsv"
+## Optional: write a file with all Pvalues
+res.f = "sQTLs-CEU-all.tsv"
 if(file.exists(res.f)) file.remove(res.f)
 tmp = reduceResultsList(sQTL.reg, fun=function(job, res){
   write.table(res, file=res.f, quote=FALSE, row.names=FALSE, col.names=!file.exists(res.f), append=file.exists(res.f), sep="\t")
 })
+## Optional
 
 ## 4) Get significant sQTLs
-
-## 5) svQTLs
-
-## 6) Final sQTLs
+## system("rm -rf getSig")
+getSig.reg <- makeRegistry(id="getSig", seed=123, file.dir="getSig")
+getSig.f <- function(FDR, out.pdf, sQTL.reg){
+  library(plyr)
+  res.df = reduceResultsList(sQTL.reg, fun=function(job, res)res)
+  res.df = ldply(res.df, identity)
+  library(sQTLseekeR)
+  sqtls(res.df, FDR=FDR, out.pdf=out.pdf)
+}
+batchMap(getSig.reg, getSig.f,.01, more.args=list(out.pdf="sQTLs-FDR01.pdf", sQTL.reg=sQTL.reg))
+submitJobs(getSig.reg, 1, resources=list(walltime="1:0:0", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
+showStatus(getSig.reg)
+sqtls.df = loadResult(getSig.reg, 1)

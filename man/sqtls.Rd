@@ -7,12 +7,14 @@ sqtls(res.df, FDR = 0.01, md.min = 0.01, out.pdf = NULL,
   svQTL.removal = TRUE)
 }
 \arguments{
-\item{res.df}{a data.frame with the results from 'sqtl.seeker' with the P-values
+\item{res.df}{a data.frame, output of 'sqtl.seeker' with the P-values
 for each gene/SNP test.}
 
 \item{FDR}{the False Discovery Rate to call an association significant. Default is 0.01.}
 
-\item{md.min}{the minimum MD (Maximum Difference) in relative expression desired. Maximum difference in relative expression (MD) gives an idea of the effect size of the association. Default is 0.01.}
+\item{md.min}{the minimum MD (Maximum Difference) in relative expression desired. Maximum
+difference in relative expression (MD) gives an idea of the effect size of the association.
+Default is 0.01.}
 
 \item{out.pdf}{the name of the pdf file to create. If NULL (default), no pdf output
 will be created. If non-NULL, the distribution of the P-values and a semi-volcano plot
@@ -22,17 +24,18 @@ will be created. If non-NULL, the distribution of the P-values and a semi-volcan
 sQTL which are also significant svQTLs are not reported.}
 }
 \value{
-a subset of the input data.frame with only significant sQTLs.
+a subset of the input data.frame with only significant sQTLs and FDR estimates.
 }
 \description{
-Retrieves sQTLs after multiple testing correction and, potentially removing svQTLs.
+Retrieves sQTLs after multiple testing correction and potentially removing svQTLs.
 The distribution of the P-values and a semi-volcano plot can also be shown.
 }
 \details{
 Multiple testing correction is performed using \code{qvalue} package with default parameters.
 
-If \code{svQTL=TRUE} gene/SNPs with significant svQTL association (after multiple testing
-correction and similar FDR threshold) are removed from the final set of significant sQTLs.
+If \code{svQTL.removal=TRUE} and svQTLs were tested in 'sqtl.seeker', gene/SNPs with
+significant svQTL association (after multiple testing correction and similar FDR threshold)
+are removed from the final set of significant sQTLs.
 }
 \author{
 Jean Monlong

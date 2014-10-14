@@ -29,8 +29,14 @@ Prepare the transcript expression matrix. Transcript with low
 expression are removed. Then gene expressing only one transcript
 are removed because not informative for splicing analysis. Finally
 the relative expression of the transcripts is retrieved and genes with
-low dispersion are removed. Also genes with just a few (<25) different splicing
-patterns are removed as they don't fit the permutation process.
+low dispersion are removed. Also genes with just a few (<25)
+different splicing patterns are removed as they don't fit the
+permutation process.
+}
+\details{
+After removal of inappropriate transcripts/genes, transcript
+relative expression is computed by dividing its expression
+by the total expression of all transcripts for the gene.
 }
 \author{
 Jean Monlong

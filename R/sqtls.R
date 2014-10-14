@@ -1,21 +1,24 @@
-##' Retrieves sQTLs after multiple testing correction and, potentially removing svQTLs.
+##' Retrieves sQTLs after multiple testing correction and potentially removing svQTLs.
 ##' The distribution of the P-values and a semi-volcano plot can also be shown.
 ##'
 ##' Multiple testing correction is performed using \code{qvalue} package with default parameters.
 ##'
-##' If \code{svQTL=TRUE} gene/SNPs with significant svQTL association (after multiple testing
-##' correction and similar FDR threshold) are removed from the final set of significant sQTLs. 
+##' If \code{svQTL.removal=TRUE} and svQTLs were tested in 'sqtl.seeker', gene/SNPs with
+##' significant svQTL association (after multiple testing correction and similar FDR threshold)
+##' are removed from the final set of significant sQTLs.
 ##' @title sQTLs retrieval
-##' @param res.df a data.frame with the results from 'sqtl.seeker' with the P-values
+##' @param res.df a data.frame, output of 'sqtl.seeker' with the P-values
 ##' for each gene/SNP test.
 ##' @param FDR the False Discovery Rate to call an association significant. Default is 0.01.
-##' @param md.min the minimum MD (Maximum Difference) in relative expression desired. Maximum difference in relative expression (MD) gives an idea of the effect size of the association. Default is 0.01.
+##' @param md.min the minimum MD (Maximum Difference) in relative expression desired. Maximum
+##' difference in relative expression (MD) gives an idea of the effect size of the association.
+##' Default is 0.01.
 ##' @param out.pdf the name of the pdf file to create. If NULL (default), no pdf output
 ##' will be created. If non-NULL, the distribution of the P-values and a semi-volcano plot
 ##' (P-value vs MD) will be shown.
 ##' @param svQTL.removal if TRUE (and column 'pv.svQTL' is present in 'res.df') significant
 ##' sQTL which are also significant svQTLs are not reported.
-##' @return a subset of the input data.frame with only significant sQTLs.
+##' @return a subset of the input data.frame with only significant sQTLs and FDR estimates.
 ##' @author Jean Monlong
 ##' @export
 sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE){

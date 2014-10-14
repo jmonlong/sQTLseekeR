@@ -1,51 +1,60 @@
 ##' \code{sqtl.seeker} is the main function of \code{sQTLseekeR} package. From transcript relative expression,
 ##' prepared using \code{prepare.trans.exp}, information about the gene location and the path to an ordered genotype
-##' file, indexed by function \code{index.genotype}, potential association between each SNP and the transcript
-##' relative expression is tested. Potentially, svQTL, i.e. SNPs affecting splicing variability can also be tested
-##' to pinpoint potential false sQTL (see Details).
+##' file, indexed by function \code{index.genotype}, association between each SNP and the transcript relative
+##' expression is tested. Eventually, svQTL, i.e. SNPs affecting splicing variability can also be tested to pinpoint
+##' potential false sQTL (see Details).
 ##'
 ##' A set of filters is automatically used to remove SNPs which are unpractical or not informative. Precisely, these
-##' filters remove SNP :
+##' filters remove SNP with :
 ##' \itemize{
-##' \item{with more than 3 unknown genotypes}
-##' \item{with less than 5 samples in any genotype group}
-##' \item{with less than 5 different splicing pattern (needed for permutation efficiency) in any genotype group}}
+##' \item{more than 3 unknown genotypes}
+##' \item{less than 5 samples in any genotype group}
+##' \item{less than 5 different splicing pattern (needed for permutation efficiency) in any genotype group}}
 ##'
 ##' Testing difference in transcript relative expression between genotype groups assumes homogeneity of the variances
 ##' in these groups. Testing this assumption is more complex and computationnally intensive but if needed the user
-##' can choose to test for svQTL, i.e. gene/SNPs where this assumption is violated, by using the \code{svQTL=TRUE}. This
-##' test is run in parallel to the sQTL tests, but the copmutation time will be considerably higher. For this reason, another
-##' parameter can be tweaked, \code{nb.perm.max.svQTL}, to reduce the number of permutation for the svQTL tests if needed for
-##' feasibility reasons.
+##' can choose to test for svQTL (splicing variability QTL), i.e. gene/SNPs where this assumption is violated,
+##' by using the \code{svQTL=TRUE}. This test is run in parallel to the sQTL tests, but the computation time
+##' will be considerably higher. For this reason, another parameter can be tweaked, \code{nb.perm.max.svQTL},
+##' to reduce the number of permutation for the svQTL tests if needed for feasibility reasons.
 ##'
-##' DETAILS ON APPROXIMATION
+##' The permutation process is optimized by computing one permuted distribution per gene and using a number
+##' of permutation depending on how extreme the true scores are compared to the permuted ones. To decrease
+##' even more the computation time, an approximation of the null F distribution was given by Anderson &
+##' Robinson (2003), as a misture of Chi-square distributions whoose parameters are derived from the eigen
+##' values of the distance matrix.
 ##'
-##' DETAILS ON MD OUTPUT
+##' In addition to the F score and P-value, the maximum difference(MD) in relative expression between genotype
+##' groups is reported. This is to be used as a measure of the size of the effect. For example, if 'md' is 0.2
+##' there is one transcript whose relative expression shifted by 20% between two genotype groups.
 ##' @title sQTL seeker
 ##' @param tre.df a data.frame with transcript relative expression
 ##' produced by 'prepare.trans.exp'. 
 ##' @param genotype.f the name of the genotype file. This file need to
-##' be ordered by position, compressed and indexed using tabix (samtools).
+##' be ordered by position, compressed and indexed using 'index.genotype' or externally using tabix (samtools).
 ##' Must have column 'snpId'.
 ##' @param gene.loc a data.frame with the genes location. Columns 'chr', 'start',
 ##' 'end' and 'geneId' are required.
 ##' @param genic.window the window(bp) around the gene in which the SNPs are tested. Default is 5000 (i.e. 5kb).
 ##' @param min.nb.ext.scores the minimum number of permuted score higher than
-##' 'F.lead' to allow the computation to stop. Default is 1000.
+##' the highest true score to allow the computation to stop. Default is 1000.
 ##' @param nb.perm.max the maximum number of permutations. Default is 1e6.
-##' @param nb.perm.max.svQTL the maximum number of permutations for the svQTL computation. Default is 1e5.
+##' @param nb.perm.max.svQTL the maximum number of permutations for the svQTL computation. Default is 1e4.
 ##' @param svQTL should svQTLs test be performed in addition to sQTLs. Default is FALSE. Warning:
 ##' computation of svQTLs cannot rely on asymptotic approximation, hence the heavy permutations will
 ##' considerably increase the running time. 
 ##' @param approx should the asymptotic distribution be used instead of permutations.
 ##' Default is TRUE.
 ##' @return a data.frame with columns
-##' \item{snpId}{the SNP name}
 ##' \item{geneId}{the gene name}
+##' \item{snpId}{the SNP name}
 ##' \item{F}{the F score}
-##' \item{nb.groups}{the number of genotype groups}
+##' \item{nb.groups}{the number of genotype groups (2 or 3)}
+##' \item{md}{the maximum difference in relative expression between genotype groups (see Details)}
+##' \item{tr.first/tr.second}{the transcript IDs of the two transcripts that change the most (and symetrically).}
 ##' \item{pv}{the P-value}
 ##' \item{nb.perms}{the number of permutation used for the P-value computation}
+##' \item{F.svQTL/pv.svQTL/nb.perms.svQTL}{idem for svQTLs, if 'svQTL=TRUE'.}
 ##' @author Jean Monlong
 ##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE){
