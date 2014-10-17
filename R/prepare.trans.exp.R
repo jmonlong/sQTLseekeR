@@ -39,7 +39,6 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
         } else {
             return(data.frame())
         }
-        
     }
     
     te.df = dplyr::do(dplyr::group_by(te.df, geneId), relativize.filter.dispersion(.))
