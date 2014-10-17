@@ -14,10 +14,12 @@ To install the latest development version: `devtools::install_github("jmonlong/s
 This requires `devtools` package (more information [here](https://github.com/hadley/devtools)) 
 which can be installed with `install.packages("devtools")`. 
 
+It also requires R 3.1 or higher. 
+
 ### Analysis steps
 
 The first step is to prepare the input data. `sQTLseekeR` requires three inputs:
-* transcript expression. Column *trId* and *geneId*, corresponding to the transcript and gene ID are required. Then each column represents a sample and is filled with the expression values. Relative expression will be used hence both read counts or RPKMs works as the expression measure.
+* transcript expression. Column *trId* and *geneId*, corresponding to the transcript and gene ID are required. Then each column represents a sample and is filled with the expression values. Relative expression will be used hence both **read counts or RPKMs** works as the expression measure. However, it is not recommended to use transformed (log, quantile, or any non-linear tranformation) counts or RPKMs because Hellinger distance is suited for relative expression.
 * gene location information. In a BED-like format, the range of each gene is explicitly defined in this file.
 * genotype information. The genotype of each sample is coded as follow: 0 for ref/ref; 1 for ref/mutated; 2 for mutated/mutated; -1 for missing value. Furthermore the first four columns should gather information about the SNP: *chr*, *start*, *end* and *snpId*. Finally **this file needs to be ordered** per *chr* and *start* position.
 
