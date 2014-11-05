@@ -14,7 +14,7 @@
 compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
   geno.snp = geno.df[,labels(tre.dist)]
   if(any(geno.snp==-1)){
-    non.na = geno.snp==-1
+    non.na = geno.snp > -1
     geno.snp = geno.snp[non.na]
     tre.dist = as.dist(as.matrix(tre.dist)[non.na, non.na])
   }
