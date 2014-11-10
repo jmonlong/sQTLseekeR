@@ -84,7 +84,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     }
     
     analyze.gene.f <- function(tre.gene){
-        cat(tre.gene$geneId[1],"\n")
+        ##cat(tre.gene$geneId[1],"\n")
         ## Load genotype
         gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
             GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
@@ -110,7 +110,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                     }
                     return(data.frame(done=TRUE,res.df))
                 } else {
-                    message("No valid SNPs for ",tre.gene$geneId[1],": ",paste(names(table(snps.to.keep)),table(snps.to.keep)))
+                    message("No valid SNPs for ",tre.gene$geneId[1],": ",paste(names(table(snps.to.keep)),table(snps.to.keep),""))
                 }
             }
         }
