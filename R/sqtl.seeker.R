@@ -67,19 +67,19 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     check.genotype <- function(geno.df, tre.df){
         apply(geno.df, 1, function(geno.snp){
             if(sum(as.numeric(geno.snp)==-1)>2){
-                return(FALSE)
+                return("Missing genotype")
             } 
             geno.snp.t = table(geno.snp[geno.snp>-1])
             if(sum(geno.snp.t >= 5) < 2){
-                return(FALSE)
+                return("One group of >5 samples")
             }
             nb.diff.pts = sapply(names(geno.snp.t)[geno.snp.t>1], function(geno.i){
                 nbDiffPt(tre.df[,which(geno.snp==geno.i)])
             })
             if(sum(nb.diff.pts >= 5) < 2){
-                return(FALSE)
+                return("One group of >5 different splicing")
             }
-            return(TRUE)
+            return("PASS")
         })
     }
     
@@ -99,8 +99,8 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                 com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
                 ## Filter SNP with not enough power
                 snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
-                if(any(snps.to.keep)){
-                    genotype.gene = genotype.gene[snps.to.keep, ]
+                if(any(snps.to.keep=="PASS")){
+                    genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
                     
                     tre.dist = hellingerDist(tre.gene[,com.samples])
                     res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
@@ -109,6 +109,8 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
                         res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
                     }
                     return(data.frame(done=TRUE,res.df))
+                } else {
+                    message("No valid SNPs for ",tre.gene$geneId[1],": ",table(snps.to.keep))
                 }
             }
         }
