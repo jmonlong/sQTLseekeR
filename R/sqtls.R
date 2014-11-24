@@ -18,10 +18,11 @@
 ##' (P-value vs MD) will be shown.
 ##' @param svQTL.removal if TRUE (and column 'pv.svQTL' is present in 'res.df') significant
 ##' sQTL which are also significant svQTLs are not reported.
+##' @param FDR.svQTL the False Discovery Rate to call a svQTL, that possibly removed from the final set of sQTLs.
 ##' @return a subset of the input data.frame with only significant sQTLs and FDR estimates.
 ##' @author Jean Monlong
 ##' @export
-sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE){
+sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE, FDR.svQTL=.01){
     res.df$qv = qvalue::qvalue(res.df$pv)$qvalues
 
     if(!is.null(out.pdf)){
@@ -35,7 +36,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE)
     if(any(colnames(res.df)=="pv.svQTL")){
         res.df$qv.svQTL = qvalue::qvalue(res.df$pv.svQTL)$qvalues
         if(svQTL.removal){
-            res.df = subset(res.df, qv.svQTL >= FDR)
+            res.df = subset(res.df, qv.svQTL >= FDR.svQTL)
             if(!is.null(out.pdf)){
                 print(ggplot2::ggplot(res.df, ggplot2::aes(x=pv)) +
                       ggplot2::geom_histogram() + ggplot2::theme_bw() +

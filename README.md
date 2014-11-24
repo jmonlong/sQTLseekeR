@@ -23,7 +23,7 @@ The first step is to prepare the input data. `sQTLseekeR` requires three inputs:
 * gene location information. In a BED-like format, the range of each gene is explicitly defined in this file.
 * genotype information. The genotype of each sample is coded as follow: 0 for ref/ref; 1 for ref/mutated; 2 for mutated/mutated; -1 for missing value. Furthermore the first four columns should gather information about the SNP: *chr*, *start*, *end* and *snpId*. Finally **this file needs to be ordered** per *chr* and *start* position.
 
-When all input files are correctly formatted the `sQTLseekeR` prepares the data through functions `prepare.trans.exp` and `index.genotype`.
+When all input files are correctly formatted `sQTLseekeR` prepares the data through functions `prepare.trans.exp` and `index.genotype`.
 * `prepare.trans.exp` will :
   * remove transcripts with low expression.
   * remove genes with less than two expressed transcript.
@@ -36,6 +36,8 @@ Once the input files are ready, `sqtl.seeker` function will compute the P-values
 * `genic.window` the window(bp) around the gene in which the SNPs are tested. Default is 5000 (i.e. 5kb).
 * `svQTL` should svQTLs test be performed in addition to sQTLs (default is FALSE). svQTLs are used to identify potential false positive among the significant sQTLs. svQTLs represents situation where the variance in transcript relative expression is different between genotype groups. In this particular situation identification of sQTLs is less robust as we assume homogeneity of the variance between groups, hence it might be safer to remove svQTLs from the list of reported sQTLs. However computation of svQTLs cannot rely on an asymptotic approximation, hence the heavy permutations will considerably increase the running time. 
 * `nb.perm.max` the maximum number of permutation/simulation to compute the P-value. The higher this number, the lower the P-values can potentially get but the longer the computation (especially relevant when `svQTL=TRUE`).
+
+Finally, function `sqtls` is used to retrieve significant associations. The user can manually define a false discovery rate(FDR) or perform further filtering afterwards. Of note, there is a separate FDR threshold for svQTL removal (if svQTLs were computed), which is usually preferred to be low (e.g. around 0.01).
 
 An example of an analysis can be found in folder `scripts`.
 

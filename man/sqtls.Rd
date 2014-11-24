@@ -4,7 +4,7 @@
 \title{sQTLs retrieval}
 \usage{
 sqtls(res.df, FDR = 0.01, md.min = 0.01, out.pdf = NULL,
-  svQTL.removal = TRUE)
+  svQTL.removal = TRUE, FDR.svQTL = 0.01)
 }
 \arguments{
 \item{res.df}{a data.frame, output of 'sqtl.seeker' with the P-values
@@ -22,6 +22,8 @@ will be created. If non-NULL, the distribution of the P-values and a semi-volcan
 
 \item{svQTL.removal}{if TRUE (and column 'pv.svQTL' is present in 'res.df') significant
 sQTL which are also significant svQTLs are not reported.}
+
+\item{FDR.svQTL}{the False Discovery Rate to call a svQTL, that possibly removed from the final set of sQTLs.}
 }
 \value{
 a subset of the input data.frame with only significant sQTLs and FDR estimates.
