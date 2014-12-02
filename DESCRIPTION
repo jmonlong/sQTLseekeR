@@ -17,6 +17,7 @@ Imports:
     IRanges,
     permute,
     ggplot2,
-    qvalue
+    qvalue,
+    plyr
 Suggests:
     testthat

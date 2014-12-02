@@ -117,7 +117,11 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         return(data.frame(done=FALSE))
     }
     
-    ret.df = dplyr::do(dplyr::group_by(tre.df, geneId), analyze.gene.f(.))
+    ret.df = plyr::ldply(lapply(unique(tre.df$geneId), function(gene.i){
+        df = subset(tre.df, geneId==gene.i)
+        data.frame(geneId=gene.i, analyze.gene.f(df))
+    }), identity)
+
     if(any(ret.df$done)){
         ret.df = subset(ret.df, done)
         ret.df$done=NULL
