@@ -41,7 +41,7 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
         }
     }
     
-    res.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
+    te.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
         df = subset(te.df, geneId==gene.i)
         relativize.filter.dispersion(df)
     }), identity)
