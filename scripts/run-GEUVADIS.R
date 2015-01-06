@@ -6,12 +6,12 @@ library(BatchJobs)
 library(sQTLseekeR)
 
 ## Input files: transcript expression, gene location and genotype information
-trans.exp.f = "GD667.TrQuantFlux.GeneENSG.rpkm.noRepl.ProtCod.ourf.sampNames.txt.gz"
-gene.bed.f = "genes.bed.gz"
-genotype.f = "snps-Geuvadis.txt"
+trans.exp.f = "../Data/trExp.tsv.gz"
+gene.bed.f = "../Data/genes.bed"
+genotype.f = "../Data/snps.tsv.gz"
 
 ## Getting the IDs of samples in CEU population
-groups = read.table("sample-groups.tsv", header=TRUE, as.is=TRUE)
+groups = read.table("../Data/sample-groups.tsv", header=TRUE, as.is=TRUE)
 ceu.samples = subset(groups,group=="CEU")$sample
 
 ## 1) Index the genotype file (if not done externally before)
@@ -20,7 +20,7 @@ genotype.indexed.f = index.genotype(genotype.f)
 ## 2) Prepare transcript expression
 te.df = read.table(trans.exp.f, as.is=TRUE, header=TRUE, sep="\t")
 colnames(te.df)[1:2] = c("trId", "geneId")
-te.df = te.df[,c("trId", "geneId", samples)]
+te.df = te.df[,c("trId", "geneId", ceu.samples)]
 tre.df = prepare.trans.exp(te.df)
 
 ## 3) Test gene/SNP associations
