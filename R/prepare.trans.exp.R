@@ -25,6 +25,7 @@
 ##' @export
 prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, min.dispersion=.1){
     samples = setdiff(colnames(te.df), c("chr","start","end","geneId","trId"))
+    samples.sub = sample(samples, min(40,length(samples)))
     trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
     te.df = te.df[trans.to.keep,]
     nb.trans = table(te.df$geneId)
@@ -33,7 +34,7 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
 
     relativize.filter.dispersion <- function(df){
         df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
-        disp = te.dispersion(hellingerDist(df[,samples]))
+        disp = te.dispersion(hellingerDist(df[,samples.sub]))
         if(disp > min.dispersion & nbDiffPt(df[,samples])>25){
             return(df)
         } else {

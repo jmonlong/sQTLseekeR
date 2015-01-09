@@ -45,6 +45,7 @@
 ##' considerably increase the running time. 
 ##' @param approx should the asymptotic distribution be used instead of permutations.
 ##' Default is TRUE.
+##' @param verbose Should the gene IDs be outputed when analyzed. Default is TRUE. Mainly for debugging.
 ##' @return a data.frame with columns
 ##' \item{geneId}{the gene name}
 ##' \item{snpId}{the SNP name}
@@ -57,7 +58,7 @@
 ##' \item{F.svQTL/pv.svQTL/nb.perms.svQTL}{idem for svQTLs, if 'svQTL=TRUE'.}
 ##' @author Jean Monlong
 ##' @export
-sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE){
+sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE, verbose=TRUE){
 
     ## Check if:
     ## - less than 3 missing genotype values
@@ -84,7 +85,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     }
     
     analyze.gene.f <- function(tre.gene){
-        ##cat(tre.gene$geneId[1],"\n")
+        if(verbose) message(tre.gene$geneId[1])
         ## Load genotype
         gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
             GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
