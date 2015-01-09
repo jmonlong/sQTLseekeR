@@ -81,14 +81,21 @@ showStatus(sQTL.reg)
 ## 4) Get significant sQTLs
 ## system("rm -rf getSig") ## Run to clean previous computations
 nb.chunks = 40 ## User defined parameters. We recommend aiming for chunks of ~1 million tests.
-jobs.chunks = tapply(findDone(sQTL.reg), rep(1:nb.chunks, ceiling(getJobNr(sQTL.reg)/nb.chunks)[1:getJobNr(sQTL.reg)], identity)
+nb.jobs.done = length(findDone(sQTL.reg))
+jobs.chunks = tapply(findDone(sQTL.reg), rep(1:nb.chunks, ceiling(nb.jobs.done/nb.chunks))[1:nb.jobs.done], identity)
 getSig.reg <- makeRegistry(id="getSig", seed=123, file.dir="getSig")
 getSig.f <- function(chunk.id, FDR, out.pdf, sQTL.reg, jobs.chunks){
-  res.df = reduceResultsDataFrame(sQTL.reg, ids=jobs.chunks[[chunk.id]], fun=function(job, res)res)
+  library(plyr)
+  res.df = reduceResultsList(sQTL.reg, ids=jobs.chunks[[chunk.id]], fun=function(job, res)res)
+  res.df = ldply(res.df, identity)
   library(sQTLseekeR)
-  sqtls(res.df, FDR=FDR, out.pdf=out.pdf)
+  list(nb.gene.snp=nrow(res.df),
+       sqtls=sqtls(res.df, FDR=FDR, out.pdf=out.pdf)
+ )
 }
 batchMap(getSig.reg, getSig.f,1:nb.chunks, more.args=list(FDR=.01, out.pdf="sQTLs-FDR01.pdf", sQTL.reg=sQTL.reg, jobs.chunks=jobs.chunks))
 submitJobs(getSig.reg, 1:nb.chunks, resources=list(walltime="1:0:0", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
 showStatus(getSig.reg)
-sqtls.df = reduceResultsDataFrame(getSig.reg, fun=function(job, res)res)
+library(plyr)
+sqtls.df = ldply(reduceResultsList(getSig.reg, fun=function(job, res)res$sqtls), identity)
+summary(reduceResultsVector(getSig.reg, fun=function(job, res)res$nb.gene.snp))
