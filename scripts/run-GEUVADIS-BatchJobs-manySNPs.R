@@ -16,6 +16,7 @@
 
 library(BatchJobs)
 library(sQTLseekeR)
+library(plyr)
 
 ## Input files: transcript expression, gene location and genotype information
 ## Note: these are just toy examples, in practice plug your data here.
@@ -96,6 +97,5 @@ getSig.f <- function(chunk.id, FDR, out.pdf, sQTL.reg, jobs.chunks){
 batchMap(getSig.reg, getSig.f,1:nb.chunks, more.args=list(FDR=.01, out.pdf="sQTLs-FDR01.pdf", sQTL.reg=sQTL.reg, jobs.chunks=jobs.chunks))
 submitJobs(getSig.reg, 1:nb.chunks, resources=list(walltime="1:0:0", cores="1",queue="rg-el6"), wait=function(retries) 100, max.retries=10)
 showStatus(getSig.reg)
-library(plyr)
 sqtls.df = ldply(reduceResultsList(getSig.reg, fun=function(job, res)res$sqtls), identity)
 summary(reduceResultsVector(getSig.reg, fun=function(job, res)res$nb.gene.snp))
