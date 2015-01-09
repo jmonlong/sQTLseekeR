@@ -2,7 +2,6 @@
 ## Example of an analysis ran locally on a computer
 ##
 
-library(BatchJobs)
 library(sQTLseekeR)
 
 ## Input files: transcript expression, gene location and genotype information
