@@ -24,28 +24,44 @@
 ##' @author Jean Monlong
 ##' @export
 prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, min.dispersion=.1){
-    samples = setdiff(colnames(te.df), c("chr","start","end","geneId","trId"))
-    samples.sub = sample(samples, min(40,length(samples)))
-    trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
-    te.df = te.df[trans.to.keep,]
-    nb.trans = table(te.df$geneId)
-    trans2 = names(which(nb.trans>1))
-    te.df = subset(te.df, geneId %in% trans2)
+  if(!all(c("geneId","trId") %in% colnames(te.df))){
+    stop("Missing column in 'te.df' : 'geneId' and 'trId' are required.")
+  }
 
-    relativize.filter.dispersion <- function(df){
-        df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
-        disp = te.dispersion(hellingerDist(df[,samples.sub]))
-        if(disp > min.dispersion & nbDiffPt(df[,samples])>25){
-            return(df)
-        } else {
-            return(data.frame())
-        }
+  ## Convert into character, just in case
+  te.df$geneId = as.character(te.df$geneId)
+  te.df$trId = as.character(te.df$trId)
+  ##
+  
+  samples = setdiff(colnames(te.df), c("chr","start","end","geneId","trId"))
+  if(length(samples)<5){
+    stop("Not enough samples; at least 5 samples required (although at least 20 is recommended).")
+  }
+  samples.sub = sample(samples, min(40,length(samples)))
+  trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
+  te.df = te.df[trans.to.keep,]
+  nb.trans = table(te.df$geneId)
+  trans2 = names(which(nb.trans>1))
+  te.df = te.df[which(te.df$geneId %in% trans2),]
+
+  relativize.filter.dispersion <- function(df){
+    df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
+    disp = te.dispersion(hellingerDist(df[,samples.sub]))
+    if(disp > min.dispersion & nbDiffPt(df[,samples])>25){
+      return(df)
+    } else {
+      return(data.frame())
     }
-    
-    te.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
-        df = subset(te.df, geneId==gene.i)
-        relativize.filter.dispersion(df)
-    }), identity)
-    
-    return(te.df)
+  }
+  
+  te.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
+    df = te.df[which(te.df$geneId==gene.i), ]
+    relativize.filter.dispersion(df)
+  }), identity)
+
+  if(nrow(te.df)==0){
+    stop("No genes found with suitable transcript expression.")
+  }
+  
+  return(te.df)
 }
