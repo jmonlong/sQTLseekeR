@@ -12,9 +12,16 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
+  if(class(tre.dist)!="dist"){
+    stop("'tre.dist' must be a distance object.")
+  }
   if(nrow(geno.df)>1){
     stop(geno.df$snpId[1], " SNP is duplicated in the genotype file.")
   }
+  if(!any(colnames(geno.df) %in% labels(tre.dist))){
+    stop("No common samples between genotype and transcript ratios.")
+  }
+  
   geno.snp = geno.df[,labels(tre.dist)]
   if(any(geno.snp==-1)){
     non.na = geno.snp > -1
