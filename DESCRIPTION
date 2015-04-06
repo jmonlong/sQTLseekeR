@@ -18,6 +18,7 @@ Imports:
     permute,
     ggplot2,
     qvalue,
-    plyr
+    plyr,
+    data.table
 Suggests:
     testthat

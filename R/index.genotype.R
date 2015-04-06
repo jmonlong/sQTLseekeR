@@ -9,7 +9,10 @@
 ##' @author Jean Monlong
 ##' @export
 index.genotype <- function(file){
-    file.final = Rsamtools::bgzip(file, dest=paste0(sub(".gz","",file),".bgz"),overwrite=TRUE)
-    Rsamtools::indexTabix(file.final, format="bed")
-    return(file.final)
+  if(!file.exists(file)){
+    stop("File not found: ", file)
+  }
+  file.final = Rsamtools::bgzip(file, dest=paste0(sub(".gz","",file),".bgz"),overwrite=TRUE)
+  Rsamtools::indexTabix(file.final, format="bed")
+  return(file.final)
 }

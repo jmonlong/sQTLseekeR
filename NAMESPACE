@@ -2,5 +2,7 @@
 
 export(index.genotype)
 export(prepare.trans.exp)
+export(read.bedix)
 export(sqtl.seeker)
 export(sqtls)
+import(data.table)
