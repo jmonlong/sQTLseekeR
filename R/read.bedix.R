@@ -66,6 +66,10 @@ read.bedix <- function(file, subset.reg=NULL, header=TRUE, as.is = TRUE) {
   } else {
     bed.df = read.chunk(subset.reg)
   }
-  bed.df = bed.df[order(bed.df$chr, bed.df$start),]
+
+  if(!is.null(bed.df)){
+    bed.df = bed.df[order(bed.df$chr, bed.df$start),]
+  }
+  
   return(bed.df)
 } 

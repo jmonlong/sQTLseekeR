@@ -1,6 +1,6 @@
 context("Index genotype file")
 
-snp.df =  data.frame(chr=sample(1:22,1e3, replace=TRUE), start=sample.int(1e6,1e3, replace=TRUE))
+snp.df =  data.frame(chr=sample(1:21,1e3, replace=TRUE), start=sample.int(1e6,1e3, replace=TRUE))
 snp.df$end = snp.df$start + 1
 snp.df$snpId = paste0("snp",1:nrow(snp.df))
 snp.df = snp.df[order(snp.df$chr, snp.df$start),]
@@ -57,5 +57,15 @@ test_that("Reads subset of file", {
   in.df = read.bedix("temp.tsv.bgz", snp.df)
   expect_equal(snp.df$chr, in.df$chr)
   expect_equal(snp.df[,8], in.df[,8])
+  expect_true(all(file.remove(c("temp.tsv","temp.tsv.bgz","temp.tsv.bgz.tbi"))))
+})
+
+test_that("Returns null if no data in the queried region", {
+  write.table(snp.df, file="temp.tsv", row.names=FALSE, quote=FALSE, sep="\t")
+  expect_equal(length(index.genotype("temp.tsv")),1)
+  snp.df = snp.df[sort(sample.int(nrow(snp.df), 10)),]
+  snp.df$chr = 22
+  in.df = read.bedix("temp.tsv.bgz", snp.df)
+  expect_true(is.null(in.df))
   expect_true(all(file.remove(c("temp.tsv","temp.tsv.bgz","temp.tsv.bgz.tbi"))))
 })
