@@ -12,11 +12,6 @@
 ##' @author Jean Monlong
 ##' @keywords internal
 compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6, svQTL=FALSE, approx=TRUE){
-    if(svQTL){
-        maxF = max(res.df$F.svQTL)
-    } else {
-        maxF = max(res.df$F)
-    }
     nb.gp = res.df$nb.groups[1]
     
     estNbPerm <- function(pv,min.nb.ext.scores=1000,nb.perm.max=1e6){
@@ -51,7 +46,7 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
           F.nb.ext.FP = F.nb.ext.FP + FP.cs[F.f] ## Pb ? as.character, luckily not
           nbP.tot = nbP.tot + nbP.new
           pv = 1 - ( F.nb.ext.FP / (nbP.tot+1) )
-          pv.lead = min(pv.lead)
+          pv.lead = min(pv)
         }
       }
     } else {
