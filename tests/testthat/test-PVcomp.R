@@ -25,6 +25,9 @@ test_that("Permutation and approximation give similar pvalues",{
 })
 
 test_that("Pvalues for svQTLs work also",{
+  res.df = plyr::ldply(1:nrow(geno.df), function(ii){
+    compFscore(geno.df[ii,], tre.dist, tre.df, svQTL=TRUE)
+  })
   res.df = compPvalue(res.df, tre.dist, svQTL = TRUE, nb.perm.max=200)
   expect_true(!is.null(res.df$pv.svQTL))
 })
