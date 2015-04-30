@@ -17,36 +17,63 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
     } else {
         maxF = max(res.df$F)
     }
-        
-    perm.F = compute.null(maxF,tre.dist,res.df$nb.groups[1],min.nb.ext.scores,nb.perm.max,svQTL=svQTL,approx=approx)
-
-    if(svQTL){
-        res.df$nb.perms.svQTL = perm.F$nbP.tot
-    } else {
-        res.df$nb.perms = perm.F$nbP.tot
+    nb.gp = res.df$nb.groups[1]
+    
+    estNbPerm <- function(pv,min.nb.ext.scores=1000,nb.perm.max=1e6){
+      return(min(ceiling(min.nb.ext.scores / pv  + min.nb.ext.scores / 10),nb.perm.max + min.nb.ext.scores / 10))
     }
-
-    compute.pv <- function(F,F.perms){
-        if(length(F)>1){
-            F.f = factor(F)
-            FP.c = cut(F.perms,c(-Inf,levels(F.f),Inf),right=FALSE)
-            FP.sum = summary(FP.c,maxsum=nlevels(FP.c))
-            FP.cs = cumsum(FP.sum)[-length(FP.sum)]
-            names(FP.cs) = levels(F.f)
-            FP.cs.f = FP.cs[F.f] ## Pb ? as.character, luckily not
-            names(FP.cs.f) = names(F)
-            pv = 1 - ( FP.cs.f / (length(F.perms)+1) )
-        } else {
-            pv = (sum(F <= F.perms) + 1) / (length(F.perms) + 1)
-            names(pv) = names(F)
+    
+    ado.null <- function(dist.o,nb.null,nb.gp,svQTL=FALSE,approx=TRUE){
+      nb.tot = attr(dist.o,"Size")
+      groups.f = factor(sample(1:nb.gp, nb.tot, TRUE))
+      adonis.comp(dist.o,groups.f,permutations=nb.null,f.perms=TRUE,svQTL=svQTL,approx=approx)
+    }
+    
+    if(svQTL){
+      F = res.df$F.svQTL
+    } else {
+      F= res.df$F
+    }
+    
+    if(length(F)>1){
+      F.f = factor(F)
+      F.nb.ext.FP = rep(0,length(F.f))
+      pv.lead = 1
+      nbP.tot = 0
+      while( ( pv.lead * nbP.tot < min.nb.ext.scores ) && ( nbP.tot < nb.perm.max ) ){
+        nbP.new = estNbPerm(pv.lead,min.nb.ext.scores,nb.perm.max) - nbP.tot
+        if(nbP.new > 0){
+          FP = ado.null(tre.dist,nbP.new,nb.gp,svQTL=svQTL,approx=approx)
+          FP.c = cut(FP,c(-Inf,levels(F.f),Inf),right=FALSE)
+          FP.sum = table(FP.c)
+          FP.cs = cumsum(FP.sum)[-length(FP.sum)]
+          names(FP.cs) = levels(F.f)
+          F.nb.ext.FP = F.nb.ext.FP + FP.cs[F.f] ## Pb ? as.character, luckily not
+          nbP.tot = nbP.tot + nbP.new
+          pv = 1 - ( F.nb.ext.FP / (nbP.tot+1) )
+          pv.lead = min(pv.lead)
         }
-        return(pv)
+      }
+    } else {
+      F.nb.ext.FP = 0
+      pv = 1
+      nbP.tot = 0
+      while( ( pv * nbP.tot < min.nb.ext.scores ) && ( nbP.tot < nb.perm.max ) ){
+        nbP.new = estNbPerm(pv,min.nb.ext.scores,nb.perm.max) - nbP.tot
+        if(nbP.new > 0){
+          FP = ado.null(tre.dist,nbP.new,nb.gp,svQTL=svQTL,approx=approx)
+          F.nb.ext.FP = F.nb.ext.FP + sum(F <= FP)
+          nbP.tot = nbP.tot + nbP.new
+          pv = (F.nb.ext.FP + 1) / (nbP.tot + 1)
+        }
+      }
     }
 
     if(svQTL){
-        res.df$pv.svQTL = compute.pv(res.df$F.svQTL,perm.F$FP)
+        res.df$nb.perms.svQTL = nbP.tot
     } else {
-        res.df$pv = compute.pv(res.df$F,perm.F$FP)
+        res.df$nb.perms = nbP.tot
     }
+
     return(res.df)
 }
