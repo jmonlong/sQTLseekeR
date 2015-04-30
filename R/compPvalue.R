@@ -71,8 +71,10 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
 
     if(svQTL){
         res.df$nb.perms.svQTL = nbP.tot
+        res.df$pv.svQTL = pv
     } else {
         res.df$nb.perms = nbP.tot
+        res.df$pv = pv
     }
 
     return(res.df)

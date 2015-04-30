@@ -12,6 +12,11 @@ res.df = plyr::ldply(1:nrow(geno.df), function(ii){
   compFscore(geno.df[ii,], tre.dist, tre.df)
 })
 
+test_that("Pvalues are actually computed",{
+  res.df = compPvalue(res.df, tre.dist)
+  expect_true(all(!is.null(res.df$pv)))
+})
+
 test_that("Results are reproducible",{
   res1 = compPvalue(res.df, tre.dist)
   res2 = compPvalue(res.df, tre.dist)

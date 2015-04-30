@@ -30,9 +30,9 @@ test_that("Transcripts with low expression are filtered", {
   expect_true(all(te.p$trId != te.df$trId[4]))  
   te.mat[4,1] = 0.1
   te.df = data.frame(geneId = genes, trId=transcripts, as.data.frame(te.mat))
-  te.p = prepare.trans.exp(te.df, min.dispersion = 0)
+  te.p = prepare.trans.exp(te.df, min.dispersion=0)
   expect_true(any(te.p$trId == te.df$trId[4]))  
-  te.p = prepare.trans.exp(te.df, min.transcript.exp = .2)
+  te.p = prepare.trans.exp(te.df, min.transcript.exp = .2, min.dispersion=0)
   expect_true(all(te.p$trId != te.df$trId[4]))  
 })
 
@@ -43,7 +43,7 @@ test_that("Genes with low dispersion are filtered", {
   expect_true(all(te.p$geneId != te.df$geneId[4]))  
   te.p = prepare.trans.exp(te.df, min.dispersion = .0001)
   expect_true(any(te.p$geneId == te.df$geneId[4]))  
-  te.mat[4:6,] = runif(3*length(samples), 2, 6)
+  te.mat[4:6,] = runif(3*length(samples), 2, 15)
   te.df = data.frame(geneId = genes, trId=transcripts, as.data.frame(te.mat))
   te.p = prepare.trans.exp(te.df)
   expect_true(any(te.p$geneId == te.df$geneId[4]))  
