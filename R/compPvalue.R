@@ -36,7 +36,7 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
       pv.lead = 1
       nbP.tot = 0
       while( ( pv.lead * nbP.tot < min.nb.ext.scores ) && ( nbP.tot < nb.perm.max ) ){
-        nbP.new = estNbPerm(pv.lead,min.nb.ext.scores,nb.perm.max) - nbP.tot
+        nbP.new = estNbPerm(pv.lead,min.nb.ext.scores,1e6)
         if(nbP.new > 0){
           FP = ado.null(tre.dist,nbP.new,nb.gp,svQTL=svQTL,approx=approx)
           FP.c = cut(FP,c(-Inf,levels(F.f),Inf),right=FALSE)
@@ -54,7 +54,7 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
       pv = 1
       nbP.tot = 0
       while( ( pv * nbP.tot < min.nb.ext.scores ) && ( nbP.tot < nb.perm.max ) ){
-        nbP.new = estNbPerm(pv,min.nb.ext.scores,nb.perm.max) - nbP.tot
+        nbP.new = estNbPerm(pv,min.nb.ext.scores,1e6)
         if(nbP.new > 0){
           FP = ado.null(tre.dist,nbP.new,nb.gp,svQTL=svQTL,approx=approx)
           F.nb.ext.FP = F.nb.ext.FP + sum(F <= FP)
@@ -66,10 +66,10 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
 
     if(svQTL){
         res.df$nb.perms.svQTL = nbP.tot
-        res.df$pv.svQTL = pv
+        res.df$pv.svQTL = as.numeric(pv)
     } else {
         res.df$nb.perms = nbP.tot
-        res.df$pv = pv
+        res.df$pv = as.numeric(pv)
     }
 
     return(res.df)
