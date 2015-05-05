@@ -92,6 +92,10 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     if(length(gr.gene)>0){
       ## Remove samples with non expressed genes
       tre.gene = tre.gene[,!is.na(tre.gene[1,])]
+      ## Focus on common samples
+      genotype.headers = as.character(read.table(genotype.f, as.is=TRUE, nrows=1))
+      com.samples = intersect(colnames(tre.gene),genotype.headers)
+      tre.dist = hellingerDist(tre.gene[,com.samples])
       
       res.df = data.frame()
       if(GenomicRanges::width(gr.gene)>2e4){
@@ -104,13 +108,10 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         res.df = lapply(1:length(gr.gene.spl), function(ii){
           genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
           if(!is.null(genotype.gene)){
-            ## Focus on common samples
-            com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
             ## Filter SNP with not enough power
             snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
             if(any(snps.to.keep=="PASS")){
               genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-              tre.dist = hellingerDist(tre.gene[,com.samples])
               res.df = lapply(unique(genotype.gene$snpId), function(snpId){
                 data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
               })
@@ -124,13 +125,10 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       } else {
         genotype.gene = read.bedix(genotype.f, gr.gene)
         if(!is.null(genotype.gene)){
-          ## Focus on common samples
-          com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
           ## Filter SNP with not enough power
           snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
           if(any(snps.to.keep=="PASS")){
             genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-            tre.dist = hellingerDist(tre.gene[,com.samples])
             res.df = lapply(unique(genotype.gene$snpId), function(snpId){
               data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
             })
