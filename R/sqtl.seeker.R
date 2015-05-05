@@ -60,96 +60,107 @@
 ##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE, verbose=TRUE){
 
-    ## Check if:
-    ## - less than 3 missing genotype values
-    ## - more than 5 samples per genotype group
-    ## - more than 5 different splicing pts per genotype group
-    ## Return: TRUE if snp passed, FALSE if not.
-    check.genotype <- function(geno.df, tre.df){
-        apply(geno.df, 1, function(geno.snp){
-            if(sum(as.numeric(geno.snp)==-1)>2){
-                return("Missing genotype")
-            } 
-            geno.snp.t = table(geno.snp[geno.snp>-1])
-            if(sum(geno.snp.t >= 5) < 2){
-                return("One group of >5 samples")
-            }
-            nb.diff.pts = sapply(names(geno.snp.t)[geno.snp.t>1], function(geno.i){
-                nbDiffPt(tre.df[,which(geno.snp==geno.i)])
-            })
-            if(sum(nb.diff.pts >= 5) < 2){
-                return("One group of >5 different splicing")
-            }
-            return("PASS")
-        })
-    }
-    
-    analyze.gene.f <- function(tre.gene){
-        if(verbose) message(tre.gene$geneId[1])
-        ## Load genotype
-        gr.gene = with(subset(gene.loc, geneId==tre.gene$geneId[1]),
-            GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
-        gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
-        if(length(gr.gene)>0){
-            ## Remove samples with non expressed genes
-            tre.gene = tre.gene[,!is.na(tre.gene[1,])]
-            
-            res.df = data.frame()
-            if(GenomicRanges::width(gr.gene)>2e4){
-                gr.gene.spl = rep(gr.gene, floor(GenomicRanges::width(gr.gene)/1e4))
-                GenomicRanges::start(gr.gene.spl) = seq(GenomicRanges::start(gr.gene), GenomicRanges::end(gr.gene)-1e4,1e4)
-                GenomicRanges::end(gr.gene.spl) = seq(GenomicRanges::start(gr.gene)+1e4-1, GenomicRanges::end(gr.gene),1e4)
+  ## Check if:
+  ## - less than 3 missing genotype values
+  ## - more than 5 samples per genotype group
+  ## - more than 5 different splicing pts per genotype group
+  ## Return: TRUE if snp passed, FALSE if not.
+  check.genotype <- function(geno.df, tre.df){
+    apply(geno.df, 1, function(geno.snp){
+      if(sum(as.numeric(geno.snp)==-1)>2){
+        return("Missing genotype")
+      } 
+      geno.snp.t = table(geno.snp[geno.snp>-1])
+      if(sum(geno.snp.t >= 5) < 2){
+        return("One group of >5 samples")
+      }
+      nb.diff.pts = sapply(names(geno.snp.t)[geno.snp.t>1], function(geno.i){
+        nbDiffPt(tre.df[,which(geno.snp==geno.i)])
+      })
+      if(sum(nb.diff.pts >= 5) < 2){
+        return("One group of >5 different splicing")
+      }
+      return("PASS")
+    })
+  }
+  
+  analyze.gene.f <- function(tre.gene){
+    if(verbose) message(tre.gene$geneId[1])
+    ## Load genotype
+    gr.gene = with(gene.loc[which(gene.loc$geneId==tre.gene$geneId[1]),], GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
+    gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
+    if(length(gr.gene)>0){
+      ## Remove samples with non expressed genes
+      tre.gene = tre.gene[,!is.na(tre.gene[1,])]
+      
+      res.df = data.frame()
+      if(GenomicRanges::width(gr.gene)>2e4){
+        gr.gene.spl = unlist(GenomicRanges::tile(gr.gene, width=1e4))
 
-                for(ii in 1:length(gr.gene.spl)){
-                    genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
-                    if(!is.null(genotype.gene)){
-                        ## Focus on common samples
-                        com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
-                        ## Filter SNP with not enough power
-                        snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
-                        if(any(snps.to.keep=="PASS")){
-                            genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-                            tre.dist = hellingerDist(tre.gene[,com.samples])
-                            res.df = rbind(res.df, dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL)))
-                        }
-                    }
-                }
-            } else {
-                genotype.gene = read.bedix(genotype.f, gr.gene)
-                if(!is.null(genotype.gene)){
-                    ## Focus on common samples
-                    com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
-                    ## Filter SNP with not enough power
-                    snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
-                    if(any(snps.to.keep=="PASS")){
-                        genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-                        tre.dist = hellingerDist(tre.gene[,com.samples])
-                        res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
-                    }
-                }
+        res.df = lapply(1:length(gr.gene.spl), function(ii){
+          genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
+          if(!is.null(genotype.gene)){
+            ## Focus on common samples
+            com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
+            ## Filter SNP with not enough power
+            snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+            if(any(snps.to.keep=="PASS")){
+              genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
+              tre.dist = hellingerDist(tre.gene[,com.samples])
+              res.df = lapply(unique(genotype.gene$snpId), function(snpId){
+                data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
+              })
+              res.df = plyr::ldply(res.df)
             }
-            
-            if(nrow(res.df)>0){
-                res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
-                if(svQTL){
-                    res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
-                }
-                return(data.frame(done=TRUE,res.df))
-            }
+          }
+          return(res.df)
+        })
+        res.df = plyr::ldply(res.df)
+
+      } else {
+        genotype.gene = read.bedix(genotype.f, gr.gene)
+        if(!is.null(genotype.gene)){
+          ## Focus on common samples
+          com.samples = intersect(colnames(tre.gene),colnames(genotype.gene))
+          ## Filter SNP with not enough power
+          snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+          if(any(snps.to.keep=="PASS")){
+            genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
+            tre.dist = hellingerDist(tre.gene[,com.samples])
+            res.df = lapply(unique(genotype.gene$snpId), function(snpId){
+              data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
+            })
+            res.df = plyr::ldply(res.df)
+          }
         }
-        return(data.frame(done=FALSE))
+      }
+      
+      if(nrow(res.df)>0){
+        res.df = lapply(unique(res.df$nb.groups), function(nbgp.i){
+          res.f = res.df[which(res.df$nb.groups==nbgp.i),]
+          res.f = compPvalue(res.f, tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max)
+          if(svQTL){
+            res.f = compPvalue(res.f, tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL)
+          }
+          res.f
+        })
+        res.df = plyr::ldply(res.df)
+        return(data.frame(done=TRUE,res.df))
+      }
     }
-    
-    ret.df = plyr::ldply(lapply(unique(tre.df$geneId), function(gene.i){
-        df = subset(tre.df, geneId==gene.i)
-        data.frame(geneId=gene.i, analyze.gene.f(df))
-    }), identity)
-    
-    if(any(ret.df$done)){
-        ret.df = subset(ret.df, done)
-        ret.df$done=NULL
-        return(ret.df)
-    } else {
-        return(NULL)
-    }
+    return(data.frame(done=FALSE))
+  }
+
+  ret.df = plyr::ldply(lapply(unique(tre.df$geneId), function(gene.i){
+    df = tre.df[which(tre.df$geneId==gene.i),]
+    data.frame(geneId=gene.i, analyze.gene.f(df))
+  }), identity)
+
+  if(any(ret.df$done)){
+    ret.df = ret.df[which(ret.df$done),]
+    ret.df$done=NULL
+    return(ret.df)
+  } else {
+    return(NULL)
+  }
 }
