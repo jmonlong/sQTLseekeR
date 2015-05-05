@@ -57,6 +57,7 @@
 ##' \item{nb.perms}{the number of permutation used for the P-value computation}
 ##' \item{F.svQTL/pv.svQTL/nb.perms.svQTL}{idem for svQTLs, if 'svQTL=TRUE'.}
 ##' @author Jean Monlong
+##' @import GenomicRanges
 ##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE, verbose=TRUE){
 
@@ -95,7 +96,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       
       res.df = data.frame()
       if(GenomicRanges::width(gr.gene)>2e4){
-        gr.gene.spl = unlist(GenomicRanges::tile(gr.gene, width=1e4))
+        gr.gene.spl = unlist(tile(gr.gene, width=1e4))
 
         res.df = lapply(1:length(gr.gene.spl), function(ii){
           genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
