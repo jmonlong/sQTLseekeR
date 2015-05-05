@@ -30,7 +30,7 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
     te.df = te.df[trans.to.keep,]
     nb.trans = table(te.df$geneId)
     trans2 = names(which(nb.trans>1))
-    te.df = subset(te.df, geneId %in% trans2)
+    te.df = te.df[which(te.df$geneId %in% trans2),]
 
     relativize.filter.dispersion <- function(df){
         df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
@@ -43,7 +43,7 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
     }
     
     te.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
-        df = subset(te.df, geneId==gene.i)
+        df = te.df[which(te.df$geneId==gene.i),]
         relativize.filter.dispersion(df)
     }), identity)
     
