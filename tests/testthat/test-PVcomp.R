@@ -41,7 +41,7 @@ test_that("Minimum pvalue is never below expected",{
   res.df$F[3] = res.df$F[3] * 1000000
   res.df = compPvalue(res.df, tre.dist, min.nb.ext.scores = 1, nb.perm.max = 10)
   expect_true(all(res.df$pv>1/100))
-  res.df = compPvalue(res.df, tre.dist, min.nb.ext.scores = 100, nb.perm.max = 1000)
+  res.df = compPvalue(res.df, tre.dist, min.nb.ext.scores = 10, nb.perm.max = 1000)
   expect_true(all(res.df$pv>1/10000))
   expect_true(all(res.df$pv[3]<1/100))
   res.df = compPvalue(res.df, tre.dist, min.nb.ext.scores = 100, nb.perm.max = 10000)

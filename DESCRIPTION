@@ -12,7 +12,6 @@ License: GPL-2
 Imports:
     vegan,
     Rsamtools,
-    dplyr,
     GenomicRanges,
     IRanges,
     permute,
