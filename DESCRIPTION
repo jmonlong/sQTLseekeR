@@ -18,6 +18,7 @@ Imports:
     ggplot2,
     qvalue,
     plyr,
+    dplyr,
     data.table
 Suggests:
     testthat

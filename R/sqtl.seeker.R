@@ -60,6 +60,8 @@
 ##' @export
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE, verbose=TRUE){
 
+  . = nb.groups = snpId = NULL ## Uglily appease R checks (dplyr)
+  
   ## Check if:
   ## - less than 3 missing genotype values
   ## - more than 5 samples per genotype group
@@ -112,10 +114,11 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
             if(any(snps.to.keep=="PASS")){
               genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-              res.df = lapply(unique(genotype.gene$snpId), function(snpId){
-                data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
-              })
-              res.df = plyr::ldply(res.df)
+              res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
+              ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
+              ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
+              ## })
+              ## res.df = plyr::ldply(res.df)
             }
           }
           return(res.df)
@@ -129,24 +132,29 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
           snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
           if(any(snps.to.keep=="PASS")){
             genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-            res.df = lapply(unique(genotype.gene$snpId), function(snpId){
-              data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
-            })
-            res.df = plyr::ldply(res.df)
+            res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
+            ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
+            ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
+            ## })
+            ## res.df = plyr::ldply(res.df)
           }
         }
       }
       
       if(nrow(res.df)>0){
-        res.df = lapply(unique(res.df$nb.groups), function(nbgp.i){
-          res.f = res.df[which(res.df$nb.groups==nbgp.i),]
-          res.f = compPvalue(res.f, tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max)
-          if(svQTL){
-            res.f = compPvalue(res.f, tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL)
-          }
-          res.f
-        })
-        res.df = plyr::ldply(res.df)
+        res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
+        if(svQTL){
+          res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
+        }
+        ## res.df = lapply(unique(res.df$nb.groups), function(nbgp.i){
+        ##   res.f = res.df[which(res.df$nb.groups==nbgp.i),]
+        ##   res.f = compPvalue(res.f, tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max)
+        ##   if(svQTL){
+        ##     res.f = compPvalue(res.f, tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL)
+        ##   }
+        ##   res.f
+        ## })
+        ## res.df = plyr::ldply(res.df)
         return(data.frame(done=TRUE,res.df))
       }
     }
