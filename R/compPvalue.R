@@ -36,7 +36,7 @@ compPvalue <- function(res.df, tre.dist, min.nb.ext.scores=1e3, nb.perm.max=1e6,
       pv.lead = 1
       nbP.tot = 0
       while( ( pv.lead * nbP.tot < min.nb.ext.scores ) && ( nbP.tot < nb.perm.max ) ){
-        nbP.new = estNbPerm(pv.lead,min.nb.ext.scores,1e6)
+        nbP.new = min(c(1e6, estNbPerm(pv.lead,min.nb.ext.scores,nb.perm.max)-nbP.tot))
         if(nbP.new > 0){
           FP = ado.null(tre.dist,nbP.new,nb.gp,svQTL=svQTL,approx=approx)
           FP.c = cut(FP,c(-Inf,levels(F.f),Inf),right=FALSE)
