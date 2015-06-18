@@ -1,3 +1,5 @@
+Check if continuous genotype/dosage and raise an error.
+
 Functions for:
 > Example graph
 > Classification of the event
