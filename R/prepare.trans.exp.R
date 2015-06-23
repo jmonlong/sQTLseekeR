@@ -32,10 +32,13 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
   te.df$geneId = as.character(te.df$geneId)
   te.df$trId = as.character(te.df$trId)
   ##
-  
+
   samples = setdiff(colnames(te.df), c("chr","start","end","geneId","trId"))
   if(length(samples)<5){
     stop("Not enough samples; at least 5 samples required (although at least 20 is recommended).")
+  }
+  if(length(samples)<20){
+    warning("Low sample size : it's recommended to have at least 20 samples.")
   }
   samples.sub = sample(samples, min(40,length(samples)))
   trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
@@ -47,13 +50,13 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
   relativize.filter.dispersion <- function(df){
     df[,samples] = apply(df[,samples], 2,relativize, min.gene.exp=min.gene.exp)
     disp = te.dispersion(hellingerDist(df[,samples.sub]))
-    if(disp > min.dispersion & nbDiffPt(df[,samples])>25){
+    if(disp > min.dispersion & nbDiffPt(df[,samples])>min(25,length(samples)*.8)){
       return(df)
     } else {
       return(data.frame())
     }
   }
-  
+
   te.df = plyr::ldply(lapply(unique(te.df$geneId), function(gene.i){
     df = te.df[which(te.df$geneId==gene.i), ]
     relativize.filter.dispersion(df)
@@ -62,6 +65,6 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
   if(nrow(te.df)==0){
     stop("No genes found with suitable transcript expression.")
   }
-  
+
   return(te.df)
 }

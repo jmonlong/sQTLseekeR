@@ -29,7 +29,7 @@
 ##' there is one transcript whose relative expression shifted by 20% between two genotype groups.
 ##' @title sQTL seeker
 ##' @param tre.df a data.frame with transcript relative expression
-##' produced by 'prepare.trans.exp'. 
+##' produced by 'prepare.trans.exp'.
 ##' @param genotype.f the name of the genotype file. This file need to
 ##' be ordered by position, compressed and indexed using 'index.genotype' or externally using tabix (samtools).
 ##' Must have column 'snpId'.
@@ -42,7 +42,7 @@
 ##' @param nb.perm.max.svQTL the maximum number of permutations for the svQTL computation. Default is 1e4.
 ##' @param svQTL should svQTLs test be performed in addition to sQTLs. Default is FALSE. Warning:
 ##' computation of svQTLs cannot rely on asymptotic approximation, hence the heavy permutations will
-##' considerably increase the running time. 
+##' considerably increase the running time.
 ##' @param approx should the asymptotic distribution be used instead of permutations.
 ##' Default is TRUE.
 ##' @param verbose Should the gene IDs be outputed when analyzed. Default is TRUE. Mainly for debugging.
@@ -61,7 +61,7 @@
 sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ext.scores=1000,nb.perm.max=1000000,nb.perm.max.svQTL=1e4,svQTL=FALSE,approx=TRUE, verbose=TRUE){
 
   . = nb.groups = snpId = NULL ## Uglily appease R checks (dplyr)
-  
+
   ## Check if:
   ## - less than 3 missing genotype values
   ## - more than 5 samples per genotype group
@@ -71,7 +71,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     apply(geno.df, 1, function(geno.snp){
       if(sum(as.numeric(geno.snp)==-1)>2){
         return("Missing genotype")
-      } 
+      }
       geno.snp.t = table(geno.snp[geno.snp>-1])
       if(sum(geno.snp.t >= 5) < 2){
         return("One group of >5 samples")
@@ -85,7 +85,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       return("PASS")
     })
   }
-  
+
   analyze.gene.f <- function(tre.gene){
     if(verbose) message(tre.gene$geneId[1])
     ## Load genotype
@@ -98,7 +98,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       genotype.headers = as.character(read.table(genotype.f, as.is=TRUE, nrows=1))
       com.samples = intersect(colnames(tre.gene),genotype.headers)
       tre.dist = hellingerDist(tre.gene[,com.samples])
-      
+
       res.df = data.frame()
       if(GenomicRanges::width(gr.gene)>2e4){
         pos.breaks = unique(round(seq(GenomicRanges::start(gr.gene), GenomicRanges::end(gr.gene),length.out=floor(GenomicRanges::width(gr.gene)/1e4)+1)))
@@ -108,28 +108,39 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         GenomicRanges::end(gr.gene.spl) = pos.breaks[-1]-1
 
         res.df = lapply(1:length(gr.gene.spl), function(ii){
-          genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
-          if(!is.null(genotype.gene)){
-            ## Filter SNP with not enough power
-            snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
-            if(any(snps.to.keep=="PASS")){
-              genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-              res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
-              ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
-              ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
-              ## })
-              ## res.df = plyr::ldply(res.df)
-            }
-          }
-          return(res.df)
-        })
+                          if(verbose){message("  Sub-range ",ii)}
+                          genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
+                          if(verbose & is.null(genotype.gene)){message("    No SNPs in the genomic range.")}
+                          if(!is.null(genotype.gene)){
+                            ## Filter SNP with not enough power
+                            snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+                            if(verbose){
+                              snps.to.keep.t = table(snps.to.keep)
+                              message("    ",paste(names(snps.to.keep.t), snps.to.keep.t,sep=":",collapse=", "))
+                            }
+                            if(any(snps.to.keep=="PASS")){
+                              genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
+                              res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
+                              ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
+                              ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
+                              ## })
+                              ## res.df = plyr::ldply(res.df)
+                            }
+                          }
+                          return(res.df)
+                        })
         res.df = plyr::ldply(res.df)
 
       } else {
         genotype.gene = read.bedix(genotype.f, gr.gene)
+        if(verbose & is.null(genotype.gene)){message("  No SNPs in the genomic range.")}
         if(!is.null(genotype.gene)){
           ## Filter SNP with not enough power
           snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
+          if(verbose){
+            snps.to.keep.t = table(snps.to.keep)
+            message("  ",paste(names(snps.to.keep.t), snps.to.keep.t,sep=":",collapse=", "))
+          }
           if(any(snps.to.keep=="PASS")){
             genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
             res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
@@ -140,7 +151,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
           }
         }
       }
-      
+
       if(nrow(res.df)>0){
         res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
         if(svQTL){
@@ -156,6 +167,10 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
         ## })
         ## res.df = plyr::ldply(res.df)
         return(data.frame(done=TRUE,res.df))
+      }
+    } else {
+      if(verbose){
+        warning("Issue with the gene location.")
       }
     }
     return(data.frame(done=FALSE))
