@@ -1,5 +1,5 @@
 #### Tests for:
-+ `sqtl.seeker` function : dummy example to see it breaks.
++ `sqtl.seeker` function : test unconventional inputs and different parameters.
 
 #### Functions for:
 + Example graph
