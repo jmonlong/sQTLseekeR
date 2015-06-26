@@ -4,17 +4,17 @@ sQTLseekeR
 sQTLseekeR is a R package to detect splicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Here, splicing patterns are modeled by the relative expression of the transcripts of a gene.
 
 For more information about the method and performance see article :
-Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun. 
+Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun.
 5:4698 doi: [10.1038/ncomms5698](http://www.nature.com/ncomms/2014/140820/ncomms5698/full/ncomms5698.html) (2014).
 
 ### Installation
 
-To install the latest development version: `devtools::install_github("jmonlong/sQTLseekeR")`. 
+To install the latest development version: `devtools::install_github("jmonlong/sQTLseekeR")`.
 
-This requires `devtools` package (more information [here](https://github.com/hadley/devtools)) 
-which can be installed with `install.packages("devtools")`. 
+This requires `devtools` package (more information [here](https://github.com/hadley/devtools))
+which can be installed with `install.packages("devtools")`.
 
-It also requires R 3.1 or higher. 
+It also requires R 3.1 or higher.
 
 ### Analysis steps
 
@@ -34,7 +34,7 @@ When all input files are correctly formatted `sQTLseekeR` prepares the data thro
 
 Once the input files are ready, `sqtl.seeker` function will compute the P-values for each pair of gene/SNP testing the association between the genotype and transcript relative expression. Here is a quick description of the parameters that would most likely be tweaked:
 * `genic.window` the window(bp) around the gene in which the SNPs are tested. Default is 5000 (i.e. 5kb).
-* `svQTL` should svQTLs test be performed in addition to sQTLs (default is FALSE). svQTLs are used to identify potential false positive among the significant sQTLs. svQTLs represents situation where the variance in transcript relative expression is different between genotype groups. In this particular situation identification of sQTLs is less robust as we assume homogeneity of the variance between groups, hence it might be safer to remove svQTLs from the list of reported sQTLs. However computation of svQTLs cannot rely on an asymptotic approximation, hence the heavy permutations will considerably increase the running time. 
+* `svQTL` should svQTLs test be performed in addition to sQTLs (default is FALSE). svQTLs are used to identify potential false positive among the significant sQTLs. svQTLs represents situation where the variance in transcript relative expression is different between genotype groups. In this particular situation identification of sQTLs is less robust as we assume homogeneity of the variance between groups, hence it might be safer to remove svQTLs from the list of reported sQTLs. However computation of svQTLs cannot rely on an asymptotic approximation, hence the heavy permutations will considerably increase the running time.
 * `nb.perm.max` the maximum number of permutation/simulation to compute the P-value. The higher this number, the lower the P-values can potentially get but the longer the computation (especially relevant when `svQTL=TRUE`).
 
 Finally, function `sqtls` is used to retrieve significant associations. The user can manually define a false discovery rate(FDR) or perform further filtering afterwards. Of note, there is a separate FDR threshold for svQTL removal (if svQTLs were computed), which is usually preferred to be low (e.g. around 0.01).
@@ -57,3 +57,16 @@ Another important point about `BatchJobs` is its configuration for the computing
 * If present in the working directory, `.BatchJobs.R` is loaded when the `BatchJobs` package is loaded. It defines which template to use and `BatchJobs` functions. In practice, it loads another R script file (here `makeClusterFunctionsAdaptive.R`) with the functions to use. In `.BatchJobs.R` users would only need to change the email address where to send the log messages to.
 * In `makeClusterFunctionsAdaptive.R`, users just need to check/replace `qsub`/`qdel`/`qstat` calls with the correct bash commands (sometimes `msub`/`canceljob`/`showq`). This file should also be in the working directory when `BatchJobs` is loaded.
 * Finally `cluster.tmpl` is a template form of a job bash script that would be send to the cluster. There the correct syntax for the resources or parameters of the cluster are defined. This file should also be in the working directory when `BatchJobs` is loaded.
+
+
+### FAQ
+
+#### `sqtl.seeker` outputs `NULL`. What am I doing wrong ?
+
+An output of `NULL` means there were no gene/SNPs to analyze. It is likely due to inconsistent input files. To debug check that :
+
++ Gene IDs in the transcript expression and gene location are similar.
++ Genomic coordinates in the gene location and genotype information are consistent. E.g. *1* vs *chr1*.
++ Sample names in the transcript expression and genotype are similar.
+
+If the input files are fine, an output of `NULL` might be caused by inappropriate transcript expression (e.g. genes with low expression) or genotypes (e.g. many missing values).
