@@ -41,6 +41,13 @@ test_that("Checks that required columns are present in the correct order", {
   file.remove("temp.tsv")
 })
 
+test_that("Checks that genotypes are discrete", {
+  snp.df[,-(1:4)] = runif(nrow(snp.df)*ncol(snp.df), 0, 2)
+  write.table(snp.df, file="temp.tsv", row.names=FALSE, quote=FALSE, sep="\t")
+  expect_error(index.genotype("temp.tsv"), "Discrete genotypes")
+  file.remove("temp.tsv")
+})
+
 test_that("Read entire file", {
   write.table(snp.df, file="temp.tsv", row.names=FALSE, quote=FALSE, sep="\t")
   expect_equal(length(index.genotype("temp.tsv")),1)

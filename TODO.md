@@ -1,5 +1,3 @@
-+ Check if continuous genotype/dosage and raise an error.
-
 #### Tests for:
 + `sqtl.seeker` function : dummy example to see it breaks.
 

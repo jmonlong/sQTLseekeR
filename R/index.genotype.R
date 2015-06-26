@@ -14,9 +14,13 @@ index.genotype <- function(file){
   }
 
   ## Check column names and order
-  snp1 = read.table(file, sep="\t", header=TRUE, quote="", comment.char = "", as.is=TRUE)
-  if(!all(colnames(snp1)[1:4] == c("chr","start","end","snpId"))){
+  snp50 = read.table(file, sep="\t", header=TRUE, quote="", comment.char = "", as.is=TRUE, nrows=50)
+  if(!all(colnames(snp50)[1:4] == c("chr","start","end","snpId"))){
     stop("Missing column or in incorrect order. The first 4 columns must be 'chr', 'start', 'end' and 'snpId'.")
+  }
+  ## Check that genotypes are discrete
+  if(length(unique(unlist(snp50[,-(1:4)])))>10){
+    stop("Discrete genotypes are required but the inputed genotypes look continuous.")
   }
   
   file.final = Rsamtools::bgzip(file, dest=paste0(sub(".gz","",file),".bgz"),overwrite=TRUE)
