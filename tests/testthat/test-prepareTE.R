@@ -75,9 +75,11 @@ test_that("Stops if not enough samples", {
   expect_error(prepare.trans.exp(te.df), "Not enough samples")
 })
 
-test_that("Error if no suitable gene", {
+test_that("Stops if no suitable transcripts/genes", {
   te.df = data.frame(geneId = genes, trId=transcripts, as.data.frame(te.mat))
-  expect_error(prepare.trans.exp(te.df, min.dispersion=Inf), "No genes")
+  expect_error(prepare.trans.exp(te.df, min.transcript.exp=30), "No transcripts")
+  expect_error(prepare.trans.exp(te.df, min.dispersion=3), "No genes")
+  expect_error(prepare.trans.exp(te.df, min.gene.exp=30), "No genes")
 })
 
 

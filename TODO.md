@@ -1,4 +1,3 @@
-+ Verbose TE preparation : which genes/transcripts removed for each filter
 + Check if continuous genotype/dosage and raise an error.
 
 #### Tests for:

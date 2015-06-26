@@ -19,11 +19,12 @@
 ##' gene expression are removed from the analysis of this gene.
 ##' @param min.dispersion the minimum dispersion of the transcript
 ##' relative expression. Genes with lower dispersion are removed.
+##' @param verbose If TRUE the names of filtered genes will be displayed. Default is FALSE.
 ##' @return a data.frame with the relative transcript expression for the
 ##' genes to study.
 ##' @author Jean Monlong
 ##' @export
-prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, min.dispersion=.1){
+prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, min.dispersion=.1, verbose=FALSE){
   if(!all(c("geneId","trId") %in% colnames(te.df))){
     stop("Missing column in 'te.df' : 'geneId' and 'trId' are required.")
   }
@@ -42,9 +43,18 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
   }
   samples.sub = sample(samples, min(40,length(samples)))
   trans.to.keep = apply(te.df[,samples],1,function(r)any(r>min.transcript.exp))
-  te.df = te.df[trans.to.keep,]
+  if(all(!trans.to.keep)){
+    stop("No transcripts with expression above threshold")
+  }
+  if(verbose & any(!trans.to.keep)){
+    message("Filtered transcripts : ", paste(te.df$trId[which(!trans.to.keep)],collapse=" "))
+  }
+  te.df = te.df[which(trans.to.keep),]
   nb.trans = table(te.df$geneId)
   trans2 = names(which(nb.trans>1))
+  if(verbose & any(nb.trans<=1)){
+    message("Filtered single-transcript genes : ", paste(setdiff(unique(te.df$geneId),trans2),collapse=" "))
+  }
   te.df = te.df[which(te.df$geneId %in% trans2),]
 
   relativize.filter.dispersion <- function(df){
@@ -61,6 +71,10 @@ prepare.trans.exp <- function(te.df, min.transcript.exp=.01,min.gene.exp=.01, mi
     df = te.df[which(te.df$geneId==gene.i), ]
     relativize.filter.dispersion(df)
   }), identity)
+
+  if(verbose & length(unique(te.df$geneId))!=length(trans2)){
+    message("Filtered low exp/disp genes : ", paste(setdiff(trans2,unique(te.df$geneId)),collapse=" "))
+  }
 
   if(nrow(te.df)==0){
     stop("No genes found with suitable transcript expression.")
