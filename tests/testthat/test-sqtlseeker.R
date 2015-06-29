@@ -13,7 +13,7 @@ te.df = prepare.trans.exp(te.df)
 
 ## Create genes coordinates
 gene.bed = data.frame(chr=sample(1:21,12, replace=TRUE), start=sample.int(1e6,12, replace=TRUE))
-gene.bed$end = gene.bed$start + round(runif(nrow(gene.bed),10,1e3))
+gene.bed$end = gene.bed$start + round(runif(nrow(gene.bed),10,4e3))
 gene.bed$geneId = paste0("g",1:12)
 
 ## Genotypes creation
@@ -33,6 +33,12 @@ genotype.f = index.genotype("temp.tsv")
 
 test_that("Non-NULL output",{
   expect_true(!is.null(sqtl.seeker(te.df, genotype.f, gene.bed)))
+})
+
+test_that("Several ranges tested for one gene",{
+  gene.bed2 = gene.bed[rep(1:nrow(gene.bed),5),]
+  gene.bed2$geneId = sample(gene.bed2$geneId)
+  expect_true(!is.null(sqtl.seeker(te.df, genotype.f, gene.bed2)))
 })
 
 file.remove(c("temp.tsv","temp.tsv.bgz","temp.tsv.bgz.tbi"))

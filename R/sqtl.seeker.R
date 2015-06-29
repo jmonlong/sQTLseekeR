@@ -90,7 +90,9 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     if(verbose) message(tre.gene$geneId[1])
     ## Load genotype
     gr.gene = with(gene.loc[which(gene.loc$geneId==tre.gene$geneId[1]),], GenomicRanges::GRanges(chr, IRanges::IRanges(start, end)))
-    gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
+    if(genic.window>0){
+      gr.gene = GenomicRanges::resize(gr.gene, GenomicRanges::width(gr.gene)+2*genic.window, fix="center")
+    }
     if(length(gr.gene)>0){
       ## Remove samples with non expressed genes
       tre.gene = tre.gene[,!is.na(tre.gene[1,])]
@@ -100,46 +102,29 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       tre.dist = hellingerDist(tre.gene[,com.samples])
 
       res.df = data.frame()
-      if(GenomicRanges::width(gr.gene)>2e4){
-        pos.breaks = unique(round(seq(GenomicRanges::start(gr.gene), GenomicRanges::end(gr.gene),length.out=floor(GenomicRanges::width(gr.gene)/1e4)+1)))
-        gr.gene.spl = rep(gr.gene, length(pos.breaks)-1)
-        GenomicRanges::start(gr.gene.spl) = pos.breaks[-length(pos.breaks)]
-        pos.breaks[length(pos.breaks)] = pos.breaks[length(pos.breaks)]+1
-        GenomicRanges::end(gr.gene.spl) = pos.breaks[-1]-1
-
-        res.df = lapply(1:length(gr.gene.spl), function(ii){
-                          if(verbose){message("  Sub-range ",ii)}
-                          genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
-                          if(verbose & is.null(genotype.gene)){message("    No SNPs in the genomic range.")}
-                          if(!is.null(genotype.gene)){
-                            ## Filter SNP with not enough power
-                            snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
-                            if(verbose){
-                              snps.to.keep.t = table(snps.to.keep)
-                              message("    ",paste(names(snps.to.keep.t), snps.to.keep.t,sep=":",collapse=", "))
-                            }
-                            if(any(snps.to.keep=="PASS")){
-                              genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-                              res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
-                              ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
-                              ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
-                              ## })
-                              ## res.df = plyr::ldply(res.df)
-                            }
-                          }
-                          return(res.df)
-                        })
-        res.df = plyr::ldply(res.df)
-
-      } else {
-        genotype.gene = read.bedix(genotype.f, gr.gene)
-        if(verbose & is.null(genotype.gene)){message("  No SNPs in the genomic range.")}
+      gr.gene.spl = gr.gene
+      if(any(GenomicRanges::width(gr.gene)>2e4)){
+        gr.gene.spl = gr.gene[which(GenomicRanges::width(gr.gene)<=2e4)]
+        for(ii in unique(which(GenomicRanges::width(gr.gene)>2e4))){
+          pos.breaks = unique(round(seq(GenomicRanges::start(gr.gene[ii]), GenomicRanges::end(gr.gene[ii]),length.out=floor(GenomicRanges::width(gr.gene[ii])/1e4)+1)))
+          gr.gene.spl.ii = rep(gr.gene[ii], length(pos.breaks)-1)
+          GenomicRanges::start(gr.gene.spl.ii) = pos.breaks[-length(pos.breaks)]
+          pos.breaks[length(pos.breaks)] = pos.breaks[length(pos.breaks)]+1
+          GenomicRanges::end(gr.gene.spl.ii) = pos.breaks[-1]-1
+          gr.gene.spl = c(gr.gene.spl, gr.gene.spl.ii)
+        }
+      }
+      
+      res.df = lapply(1:length(gr.gene.spl), function(ii){
+        if(verbose){message("  Sub-range ",ii)}
+        genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
+        if(verbose & is.null(genotype.gene)){message("    No SNPs in the genomic range.")}
         if(!is.null(genotype.gene)){
           ## Filter SNP with not enough power
           snps.to.keep = check.genotype(genotype.gene[,com.samples], tre.gene[,com.samples])
           if(verbose){
             snps.to.keep.t = table(snps.to.keep)
-            message("  ",paste(names(snps.to.keep.t), snps.to.keep.t,sep=":",collapse=", "))
+            message("    ",paste(names(snps.to.keep.t), snps.to.keep.t,sep=":",collapse=", "))
           }
           if(any(snps.to.keep=="PASS")){
             genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
@@ -150,8 +135,10 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
             ## res.df = plyr::ldply(res.df)
           }
         }
-      }
-
+        return(res.df)
+      })
+      res.df = do.call(rbind, res.df)
+      
       if(nrow(res.df)>0){
         res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
         if(svQTL){
@@ -179,7 +166,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
   ret.df = plyr::ldply(lapply(unique(tre.df$geneId), function(gene.i){
     df = tre.df[which(tre.df$geneId==gene.i),]
     data.frame(geneId=gene.i, analyze.gene.f(df))
-  }), identity)
+  }))
 
   if(any(ret.df$done)){
     ret.df = ret.df[which(ret.df$done),]

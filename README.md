@@ -73,3 +73,9 @@ If the input files are fine, an output of `NULL` might be caused by inappropriat
 #### What are these svQTLs ?
 
 svQTLs are SNPs associated with splicing variability of a gene. Here the relative transcript expression wight be globally similar between genotype groups but much more variable in specifc one. Although the biological interpretation is not straightforward, we use them to flag potential false sQTLs. Indeed, the test for diffential transcript relative expression assumes similar variability between geontype groups. Hence if a conservative approach to find sQTLs would be to retrieve significant sQTLs that are not svQTLs.
+
+#### What about trans-sQTLs ?
+
+By default, sQTLseekeR tests association between a gene and SNPs within or close by (defined by `genic.window` parameter). Testing association between all SNPs and all genes is not feasible : it would require too much computation and we don't see a good multiple-testing correction for this design that would fit our permuted/simulated P-values.
+
+However, **the user can specify exactly which regions should be tested for each gene**. Instead of using the gene location for `gene.loc` parameter, the user can feed the locations of the regions to test. Similarly to the gene location, *chr*, *start*, *end* and *geneId* columns define the region and the gene to test. Several regions can be defined for a same gene. Of note, in this design, `genic.window=0` could be used to ensure that no flanking regions are added to the regions to test.
