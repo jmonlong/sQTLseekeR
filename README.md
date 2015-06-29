@@ -15,10 +15,10 @@ This requires `devtools` package (more information [here](https://github.com/had
 which can be installed with `install.packages("devtools")`.
 
 Some [Bioconductor](http://bioconductor.org/) packages are also required. They can be installed with :
-``
+```
 source("http://bioconductor.org/biocLite.R")
-biocLite("Rsamtools", "qvalue")
-``
+biocLite(c("Rsamtools", "qvalue"))
+```
 
 It also requires R 3.1 or higher.
 
