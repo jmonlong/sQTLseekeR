@@ -23,7 +23,8 @@ makeClusterFunctionsAdaptive <- function (template.file){
         cfKillBatchJob("qdel", batch.job.id)
     }
     listJobs = function(conf, reg) {
-        BatchJobs:::runOSCommandLinux("qstat", "-u $USER")$output
+      lj = BatchJobs:::runOSCommandLinux("qstat")$output[-(1:2)]
+      unique(as.numeric(gsub("[ ]+([0-9]+)[ ]+.*","\\1",lj)))
     }
     getArrayEnvirName = function() "TASKID"
     makeClusterFunctions(name = "Adaptive", submitJob = submitJob,

@@ -1,3 +1,7 @@
+##
+#### Some internal benchmark to guide optimization
+##
+
 ## library(sQTLseekeR)
 devtools::load_all("..")
 
@@ -5,9 +9,10 @@ library(plyr)
 library(ggplot2)
 
 ## Input files: transcript expression, gene location and genotype information
-trans.exp.f = "../Data/trExp.tsv.gz"
-gene.bed.f = "../Data/genes.bed"
-genotype.f = "../Data/snps.tsv.gz"
+setwd("../Data")
+trans.exp.f = "transExpression.tsv.gz"
+gene.bed.f = "genes.bed"
+genotype.f = "snps-012coded.tsv"
 
 ## 1) Index the genotype file (if not done externally before)
 genotype.indexed.f = index.genotype(genotype.f)
@@ -15,7 +20,8 @@ genotype.indexed.f = index.genotype(genotype.f)
 ## 2) Prepare transcript expression
 te.df = read.table(trans.exp.f, as.is=TRUE, header=TRUE, sep="\t")
 samples = colnames(te.df)[-(1:2)]
-colnames(te.df)[1:2] = c("trId", "geneId")
+te.df = te.df[,c("trId","geneId",rep(samples, 5))]
+samples = colnames(te.df)[-(1:2)]
 
 ctime.prep.te = ldply(seq(10,300,10),function(nb.samp){
     data.frame(nb.samp=nb.samp,elapsed=system.time({tre.df = prepare.trans.exp(te.df[,c("trId", "geneId", samples[1:nb.samp])])})["elapsed"])

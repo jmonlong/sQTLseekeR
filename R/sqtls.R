@@ -49,7 +49,8 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE,
     }
   }
   
-  res.df = res.df[which(res.df$qv<=FDR & md>=md.min),]
+  res.df = res.df[which(res.df$qv<=FDR & res.df$md>=md.min),]
+  rownames(res.df) = NULL
 
   if(!is.null(out.pdf)){
     if(nrow(res.df)>0){

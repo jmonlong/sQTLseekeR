@@ -4,6 +4,7 @@
 
 #### Tests for:
 + `sqtl.seeker` function : test unconventional inputs and different parameters.
++ `sqtls` function.
 
 #### Functions for:
 + Example graph
