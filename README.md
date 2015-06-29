@@ -20,7 +20,7 @@ source("http://bioconductor.org/biocLite.R")
 biocLite(c("Rsamtools", "qvalue"))
 ```
 
-It also requires R 3.1 or higher.
+**R 3.1 or higher** is required.
 
 ### Analysis steps
 
