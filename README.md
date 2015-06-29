@@ -25,7 +25,7 @@ biocLite(c("Rsamtools", "qvalue"))
 ### Analysis steps
 
 The first step is to prepare the input data. `sQTLseekeR` requires three inputs:
-* transcript expression. Column *trId* and *geneId*, corresponding to the transcript and gene ID are required. Then each column represents a sample and is filled with the expression values. Relative expression will be used hence both **read counts or RPKMs** works as the expression measure. However, it is not recommended to use transformed (log, quantile, or any non-linear tranformation) counts or RPKMs because Hellinger distance is suited for relative expression.
+* transcript expression. Column *trId* and *geneId*, corresponding to the transcript and gene ID are required. Then each column represents a sample and is filled with the expression values. Relative expression will be used hence both **read counts or RPKMs** works as the expression measure. However, it is not recommended to use transformed (log, quantile, or any non-linear transformation) counts or RPKMs because Hellinger distance is suited for relative expression.
 * gene location information. In a BED-like format, the location of each gene is explicitly defined in this file. 
 * genotype information. The genotype of each sample is coded as follow: 0 for ref/ref; 1 for ref/mutated; 2 for mutated/mutated; -1 for missing value. Furthermore the first four columns should gather information about the SNP: *chr*, *start*, *end* and *snpId*. Finally **this file needs to be ordered** per *chr* and *start* position.
 
@@ -78,7 +78,7 @@ If the input files are fine, an output of `NULL` might be caused by inappropriat
 
 #### What are these svQTLs ?
 
-svQTLs are SNPs associated with splicing variability of a gene. Here the relative transcript expression wight be globally similar between genotype groups but much more variable in specifc one. Although the biological interpretation is not straightforward, we use them to flag potential false sQTLs. Indeed, the test for diffential transcript relative expression assumes similar variability between geontype groups. Hence if a conservative approach to find sQTLs would be to retrieve significant sQTLs that are not svQTLs.
+svQTLs are SNPs associated with splicing variability of a gene. Here the relative transcript expression wight be globally similar between genotype groups but much more variable in specific one. Although the biological interpretation is not straightforward, we use them to flag potential false sQTLs. Indeed, the test for differential transcript relative expression assumes similar variability between genotype groups. Hence if a conservative approach to find sQTLs would be to retrieve significant sQTLs that are not svQTLs.
 
 #### What about trans-sQTLs ?
 
