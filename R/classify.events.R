@@ -1,10 +1,10 @@
-##' Find the splicing event(s) that differenciate pairs of transcripts. 
+##' Find the splicing event(s) that differenciate pairs of transcripts.
 ##'
 ##' The transcript structure...
 ##'
 ##' The classification code follows mostly the one defined by AStalavista (\url{http://genome.crg.es/astalavista/FAQ.html})....
 ##' @title Classify splicing events
-##' @param df a data.frame that includes pairs of transcript IDs in columns 'transId1' and 'transId2'.
+##' @param df a data.frame that includes pairs of transcript IDs in columns 'tr.first' and 'tr.second'.
 ##' @param trans.struct a data.frame with the transcript structure, i.e. the location of its exons and eventually its UTRs. See Details for format.
 ##' @return a list with
 ##' \item{res}{input data.frame with two new columns: 'classCode' and 'classEvent'. See Details for interpretation.}
@@ -17,7 +17,7 @@ classify.events <- function(df, trans.struct){
     trans.struct[,col] = as.character(trans.struct[,col])
   }
   rownames(trans.struct) = trans.struct$transId
-  
+
   ## Translate a splicing code into a splicing event names
   translate.event <- function(events){
     ev.tr = c(
@@ -122,7 +122,7 @@ classify.events <- function(df, trans.struct){
   }
 
   ## Find unique pairs of transcripts to compare
-  tr.to.class = unique(t(apply(df[,c("transId1","transId2")],1,sort)))
+  tr.to.class = unique(t(apply(df[,c("tr.first","tr.second")],1,sort)))
   ## Find splicing events
   class.res = apply(tr.to.class,1,function(trs)classify.pair(trs[1],trs[2]))
   class.df = do.call(rbind, lapply(class.res,function(l)l$class.df))
@@ -138,10 +138,10 @@ classify.events <- function(df, trans.struct){
   class.stats$prop.sqtl = class.stats$count / nrow(tr.to.class)
   spl.count = sum(unlist(lapply(class.res,function(l)if(length(l$class.stats)>0) l$anySpl)))
   class.stats = rbind(class.stats, data.frame(event="any splicing",count=spl.count,prop=NA,prop.sqtl=spl.count/nrow(tr.to.class)))
-  
-  df$trPair = apply(df[,c("transId1","transId2")],1,function(trs)paste(sort(trs),collapse="-"))
+
+  df$trPair = apply(df[,c("tr.first","tr.second")],1,function(trs)paste(sort(trs),collapse="-"))
   df = merge(df,class.df,all.x=TRUE)
   df$trPair = NULL
-  
+
   return(list(res=df, stats=class.stats))
 }

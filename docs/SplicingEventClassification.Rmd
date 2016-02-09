@@ -13,7 +13,11 @@ output:
 
 ## Introduction
 
-To classify splicing events...
+sQTLseeker finds association between a SNP and the relative expression a gene's transcripts, however **we don't know exactly what splicing mechanism is involved**. One way to have an idea of the mechanism or the change that the variant could cause, is to **compare the structure of the transcripts** whose relative expression change. For example, if a transcript with a particular exon becomes less used while the same transcript but lacking this exon becomes more used, the main mechanism could be exon skipping.
+
+In practice, we **compare the structure of the two transcripts whose relative usage changes the most**. These two transcripts are specified in columns *tr.first* and *tr.second* of the output of `sqtl.seeker`/`sqtls` functions.
+
+To compare the structure of pairs of transcripts, we can either use [AStalavista](http://genome.crg.es/astalavista/) or the build-in function in the package (`classify.events`). The following code shows how to use this function, which was highly inspired from AStalavista.
 
 ## Building the transcript structure
 
@@ -25,9 +29,9 @@ The *data.frame* with the transcript structure must have these columns:
 + `cdsEnd`: same with the end positions.
 + `urtStarts` and `utrEnds`: same with UTR regions.
 
-Depending on the annotation you are using, you might need to build this *data.frame* manually.
+Depending on the annotation you are using, you might need to build this *data.frame* manually. In a later example, we'll see how to construct it from a Gencode annotation.
 
-Let's create a fake one, to use for this tutorial.
+For now, let's create a simple one to see how the function works.
 
 ```{r, message=FALSE, warning=FALSE}
 tr.str = data.frame(transId=c("t1","t2","t3"),
@@ -37,31 +41,30 @@ tr.str = data.frame(transId=c("t1","t2","t3"),
                     utrStarts=c("5,130","5,130","5,130"),
                     utrEnds=c("10,135","10,135","10,150"))
 tr.str
-```				
+```
 
+## Comparing pairs of transcripts
 
-## Simple classification
-
-Now we will compare the structure of transcripts pairs *t1* vs *t2*, and *t1* vs *t3*. We load the package and run:
+We will compare the structure of transcripts pairs *t1* vs *t2*, and *t1* vs *t3*. We load the package and run:
 
 ```{r, message=FALSE, warning=FALSE}
 library(sQTLseekeR)
-tr.df = data.frame(transId1=c("t1","t1"), transId2=c("t2","t3"))
+tr.df = data.frame(tr.first=c("t1","t1"), tr.second=c("t2","t3"))
 classify.events(tr.df, tr.str)
 ```
 
-The result is a list with the event code and name for each pair, as well as a *data.frame* with the global count of each event in the data.
+The result is a *list* with the event code and name for each pair, as well as a *data.frame* with the global count of each event in the data.
 
 It found *mutually exclusive exons* between transcript *t1* and *t2*. Transcripts *t1* and *t3* have the same CDS but differ in their last UTR, hence the event found being *tandem 3' UTR*.
 
 
-## Across multiple transcript pairs
+## Classifying transcripts from Genecode annotation.
 
-In practice the input is a larger *data.frame* with information about each sQTL, including the relevant columns *transId1* and *transId2*. These two columns contains the IDs of the two transcripts whose relative expression change the most.
+In practice the input is a larger *data.frame* with information about each sQTL, including the relevant columns *tr.first* and *tr.second*. These two columns contains the IDs of the two transcripts whose relative expression change the most.
 
-In the next example, we import the transcript structure of some genes, select 2 random transcript in each and compute the corresponding splicing event.
+In the next example, we import the transcript structure for some genes, select two random transcripts in each gene and compute the corresponding splicing event.
 
-First we need to load a transcript annotation and build the transcript structure *data.frame*. In practice, we used the GTF of the version used for the project (mapping, transcript quantification). For this tutorial, we use *AnnotationHub* package to quickly retrieve an annotation and prepare the data.
+First we need to load a transcript annotation and build the transcript structure *data.frame*. In practice, you should use the same annotation file that for the other steps of the project (mapping/transcript quantification). For this tutorial, we use *AnnotationHub* package to quickly retrieve an annotation and prepare the data. If you are working with a GTF file, import it and try to do something similar.
 
 ```{r, message=FALSE, warning=FALSE, cache=TRUE}
 library(AnnotationHub)
@@ -79,13 +82,13 @@ utr.str = data.frame(transId=utr.gr$transcript_id, st=start(utr.gr), end=end(utr
 tr.str = merge(cds.str, utr.str)
 ```
 
-Now let's pick randomly a thousand genes, and for each 2 transcipts. We also remove genes with only one transcript.
+Now let's pick randomly a thousand genes, and for each gene pick two transcripts. Of note, we remove genes with only one transcript.
 
 ```{r, message=FALSE, warning=FALSE}
 gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
 gene.tr = as.data.frame(subset(gene.tr, gene_id %in% sample(unique(gene_id),1000)))
 tr.df = gene.tr %>% group_by(gene_id) %>% mutate(transcript_id=sample(transcript_id)) %>%
-  summarize(transId1=transcript_id[1], transId2=transcript_id[2]) %>% filter(transId1!=transId2)
+  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2]) %>% filter(tr.first!=tr.second)
 ```
 
 At this point we are ready, we have our two *data.frames*:
@@ -95,17 +98,30 @@ str(tr.df)
 str(tr.str)
 ```
 
-We run the function the same way as before.
+Same as before, we run:
 
 ```{r, message=FALSE, warning=FALSE}
 ev.l = classify.events(tr.df, tr.str)
-head(ev.l$res)
-head(ev.l$stats)
 ```
 
-Eventually we can plot the distribution of the events in this data.
+Now each transcript pair is annotated with an event code and name.
 
 ```{r, message=FALSE, warning=FALSE}
+head(ev.l$res)
+```
+
+There is also a summary *data.frame*. Here *count* (*prop*) represents the number (proportion) of time an event is observed relative to the other events. However *prop.sqtl* represents the proportion of sQTLs (or input pairs) that contain each event. These numbers are different because one sQTL (or transcript pair) can involve several events.
+
+This summary *data.frame* is useful to plot the global distribution of the events.
+
+```{r, message=FALSE, warning=FALSE}
+head(ev.l$stats)
 library(ggplot2)
 ggplot(ev.l$stats, aes(x=event, y=prop.sqtl)) + geom_bar(stat="identity") + coord_flip() + ylab("proportion of transcript pairs")
 ```
+
+## Appendix
+
+Here is an illustration of the different events we consider:
+
+![Splicing events classification](splicingEventsClassification.png)
