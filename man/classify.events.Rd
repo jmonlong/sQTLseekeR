@@ -7,7 +7,7 @@
 classify.events(df, trans.struct)
 }
 \arguments{
-\item{df}{a data.frame that includes pairs of transcript IDs in columns 'transId1' and 'transId2'.}
+\item{df}{a data.frame that includes pairs of transcript IDs in columns 'tr.first' and 'tr.second'.}
 
 \item{trans.struct}{a data.frame with the transcript structure, i.e. the location of its exons and eventually its UTRs. See Details for format.}
 }
@@ -20,9 +20,26 @@ a list with
 Find the splicing event(s) that differenciate pairs of transcripts.
 }
 \details{
-The transcript structure...
+The input transcript structure is a data.frame with information about the CDSs and UTRs start/end positions as well as the DNA strand. The columns should be: 'transId' for the transcript ID; 'strand' for the DNA strand; 'cdsStart' for the CDS start positions; 'cdsEnds' for the end positions; 'utrStarts' and 'utrEnds' for the UTRs. The position in 'cdsStarts'/'cdsEnds'/'utrStart'/'utrEnds' must be a concatenation of the position with ',' as separator. See example.
 
-The classification code follows mostly the one defined by AStalavista (\url{http://genome.crg.es/astalavista/FAQ.html})....
+The classification code follows mostly the one defined by AStalavista (\url{http://genome.crg.es/astalavista/FAQ.html}). Numbers represent exon boundaries and are ordered by genomic position, '-' represents exon body, '^' a splice junction and ')' the end of the transcript. The state of the two transcript is separated by a ','. For example, '1-2^,3-4^' represent mutually exclusive exons, ',1^2-' means intron retention. In addition, we added an extra formatting: '<>' means that the event involves UTRs. Hence '<>,1^),2^)' means alternative 3' UTR.
+}
+\examples{
+
+## Creating a fake transcript structure
+tr.str = data.frame(transId=c("t1","t2","t3"),strand="+",
+cdsStarts=c("10,40,100","10,20,100","10,40,100"),
+cdsEnds=c("15,55,130","15,30,130","15,55,130"),
+utrStarts=c("5,130","5,130","5,130"),
+utrEnds=c("10,135","10,135","10,150"))
+tr.str
+
+## Creating the data.frame with the transcript pairs
+tr.df = data.frame(tr.first=c("t1","t1"), tr.second=c("t2","t3"))
+
+## Calling the function
+classify.events(tr.df, tr.str)
+
 }
 \author{
 Jean Monlong

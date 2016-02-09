@@ -1,7 +1,7 @@
 ---
 title: Splicing events classification
 author: Jean Monlong
-date: February 8, 2016
+date: February 9, 2016
 output:
    md_document:
      fig_width: 10
@@ -55,7 +55,7 @@ classify.events(tr.df, tr.str)
 
 The result is a *list* with the event code and name for each pair, as well as a *data.frame* with the global count of each event in the data.
 
-It found *mutually exclusive exons* between transcript *t1* and *t2*. Transcripts *t1* and *t3* have the same CDS but differ in their last UTR, hence the event found being *tandem 3' UTR*.
+It found *Mutually exclusive exons* between transcript *t1* and *t2*. Transcripts *t1* and *t3* have the same CDS but differ in their last UTR, hence the event found being *Tandem 3' UTR*.
 
 
 ## Classifying transcripts from Genecode annotation.
@@ -66,7 +66,7 @@ In the next example, we import the transcript structure for some genes, select t
 
 First we need to load a transcript annotation and build the transcript structure *data.frame*. In practice, you should use the same annotation file that for the other steps of the project (mapping/transcript quantification). For this tutorial, we use *AnnotationHub* package to quickly retrieve an annotation and prepare the data. If you are working with a GTF file, import it and try to do something similar.
 
-```{r, message=FALSE, warning=FALSE, cache=TRUE}
+```{r, message=FALSE, warning=FALSE}
 library(AnnotationHub)
 ah = AnnotationHub()
 genc.gr = ah[["AH49010"]]
@@ -82,7 +82,7 @@ utr.str = data.frame(transId=utr.gr$transcript_id, st=start(utr.gr), end=end(utr
 tr.str = merge(cds.str, utr.str)
 ```
 
-Now let's pick randomly a thousand genes, and for each gene pick two transcripts. Of note, we remove genes with only one transcript.
+Now let's pick randomly a thousand genes, and for each gene pick two transcripts. We remove genes with only one transcript.
 
 ```{r, message=FALSE, warning=FALSE}
 gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
@@ -126,3 +126,10 @@ ggplot(ev.l$stats, aes(x=event, y=prop.sqtl)) + geom_bar(stat="identity") + coor
 Here is an illustration of the different events we consider:
 
 ![Splicing events classification](splicingEventsClassification.png)
+
+
+## R session
+
+```{r}
+sessionInfo()
+```

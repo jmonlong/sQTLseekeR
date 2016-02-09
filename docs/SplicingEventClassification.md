@@ -53,18 +53,18 @@ classify.events(tr.df, tr.str)
 
     ## $res
     ##   tr.first tr.second  classCode              classEvent
-    ## 1       t1        t2  3-4^,1-2^ mutually exclusive exon
-    ## 2       t1        t3 <>,1^),2^)           tandem 3' UTR
+    ## 1       t1        t2  3-4^,1-2^ Mutually exclusive exon
+    ## 2       t1        t3 <>,1^),2^)           Tandem 3' UTR
     ## 
     ## $stats
     ##                     event count prop prop.sqtl
-    ## 1 mutually exclusive exon     1  0.5       0.5
-    ## 2           tandem 3' UTR     1  0.5       0.5
+    ## 1 Mutually exclusive exon     1  0.5       0.5
+    ## 2           Tandem 3' UTR     1  0.5       0.5
     ## 3            any splicing     1   NA       0.5
 
 The result is a *list* with the event code and name for each pair, as well as a *data.frame* with the global count of each event in the data.
 
-It found *mutually exclusive exons* between transcript *t1* and *t2*. Transcripts *t1* and *t3* have the same CDS but differ in their last UTR, hence the event found being *tandem 3' UTR*.
+It found *Mutually exclusive exons* between transcript *t1* and *t2*. Transcripts *t1* and *t3* have the same CDS but differ in their last UTR, hence the event found being *Tandem 3' UTR*.
 
 Classifying transcripts from Genecode annotation.
 -------------------------------------------------
@@ -91,7 +91,7 @@ utr.str = data.frame(transId=utr.gr$transcript_id, st=start(utr.gr), end=end(utr
 tr.str = merge(cds.str, utr.str)
 ```
 
-Now let's pick randomly a thousand genes, and for each gene pick two transcripts. Of note, we remove genes with only one transcript.
+Now let's pick randomly a thousand genes, and for each gene pick two transcripts. We remove genes with only one transcript.
 
 ``` r
 gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
@@ -106,10 +106,10 @@ At this point we are ready, we have our two *data.frames*:
 str(tr.df)
 ```
 
-    ## Classes 'tbl_df', 'tbl' and 'data.frame':    438 obs. of  3 variables:
-    ##  $ gene_id  : chr  "ENSG00000000460.11" "ENSG00000006062.8" "ENSG00000006576.11" "ENSG00000007047.8" ...
-    ##  $ tr.first : chr  "ENST00000456684.1" "ENST00000376926.4" "ENST00000427986.2" "ENST00000262893.4" ...
-    ##  $ tr.second: chr  "ENST00000413811.2" "ENST00000344686.2" "ENST00000416283.2" "ENST00000538583.1" ...
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    461 obs. of  3 variables:
+    ##  $ gene_id  : chr  "ENSG00000000457.8" "ENSG00000001461.11" "ENSG00000002919.9" "ENSG00000003989.12" ...
+    ##  $ tr.first : chr  "ENST00000367772.4" "ENST00000428131.1" "ENST00000393405.1" "ENST00000004531.10" ...
+    ##  $ tr.second: chr  "" "" "ENST00000359238.2" "ENST00000398090.3" ...
 
 ``` r
 str(tr.str)
@@ -135,27 +135,27 @@ Now each transcript pair is annotated with an event code and name.
 head(ev.l$res)
 ```
 
-    ##              gene_id          tr.first         tr.second
-    ## 1 ENSG00000074356.10 ENST00000158149.3 ENST00000389005.3
-    ## 2  ENSG00000077009.7 ENST00000395034.2 ENST00000168977.1
-    ## 3  ENSG00000075429.4 ENST00000169565.3 ENST00000307139.3
-    ## 4  ENSG00000091262.8 ENST00000205558.5 ENST00000546056.1
-    ## 5 ENSG00000100242.11 ENST00000216064.4 ENST00000411587.2
-    ## 6  ENSG00000100883.7 ENST00000216774.6 ENST00000546080.1
-    ##                                                                                                                                                                      classCode
-    ## 1                                                                                 (16-,(1-2^3-4^5-6^7-8^9-10^11-12^13-14^15-;<>,2^3-4^5-6^7-8^9-10^11-12^13-14^15-16^17-18^,1^
-    ## 2                                                                                                                                                     1-2^3-,4-;<>,(1-2^3-,(4-
-    ## 3                                                                                                                                                   2^),1^3-4^);<>,1-2^),3-4^)
-    ## 4 (33-34^35-36^37-38^39-40^41-42^43-44^45-46^47-48^49-50^),(1-2^3-4^5-6^7-8^9-10^11-12^13-14^15-16^17-18^19-20^21-22^23-24^25-26^27-28^29-30^31-32^);<>,(,(1-2^;<>,3-4^),1-2^)
-    ## 5                                                                                                                          (6-,(1-2^3-4^5-;1-2^,;<>,(1-2^5-6^,(3-4^;<>,2^),1^)
-    ## 6                                                                                                                                                       (1-,(2-;1-2^,;<>,1^,2^
-    ##                                     classEvent
-    ## 1               complex event;complex event 5'
-    ## 2               complex event;complex event 5'
-    ## 3                  alt 3' UTR;complex event 3'
-    ## 4            complex event 3';complex event 5'
-    ## 5 complex event 5';exon skipping;tandem 3' UTR
-    ## 6 complex event;complex event 5';exon skipping
+    ##              gene_id           tr.first         tr.second
+    ## 1  ENSG00000000457.8  ENST00000367772.4                  
+    ## 2 ENSG00000001461.11  ENST00000428131.1                  
+    ## 3 ENSG00000003989.12 ENST00000004531.10 ENST00000398090.3
+    ## 4  ENSG00000071655.9  ENST00000156825.1 ENST00000434436.1
+    ## 5  ENSG00000213999.7  ENST00000162023.5 ENST00000444486.2
+    ## 6  ENSG00000064545.8  ENST00000162044.7 ENST00000450333.2
+    ##                                              classCode
+    ## 1                                                 <NA>
+    ## 2                                                 <NA>
+    ## 3                                            1-2^,3-4^
+    ## 4                            2^,1^;<>,(2-,(1-;<>,,1^2-
+    ## 5 1-2^,;1^),2^);<>,(2-,(1-;<>,1-2^3-4^,;<>,1-2^),3-4^)
+    ## 6                      1-2^3-4^,;<>,(2-,(1-;<>,1^),2^)
+    ##                                                                              classEvent
+    ## 1                                                                                  <NA>
+    ## 2                                                                                  <NA>
+    ## 3                                                               Mutually exclusive exon
+    ## 4                       Alternative 3' splice site;Complex splicing event;Tandem 5' UTR
+    ## 5 Alternative 3' UTR;Complex 3' event;Complex splicing event;Skipped exon;Tandem 5' UTR
+    ## 6                                    Complex splicing event;Tandem 3' UTR;Tandem 5' UTR
 
 There is also a summary *data.frame*. Here *count* (*prop*) represents the number (proportion) of time an event is observed relative to the other events. However *prop.sqtl* represents the proportion of sQTLs (or input pairs) that contain each event. These numbers are different because one sQTL (or transcript pair) can involve several events.
 
@@ -165,13 +165,13 @@ This summary *data.frame* is useful to plot the global distribution of the event
 head(ev.l$stats)
 ```
 
-    ##              event count       prop  prop.sqtl
-    ## 1 complex event 3'   225 0.20814061 0.51369863
-    ## 2 complex event 5'   283 0.26179463 0.64611872
-    ## 3 intron retention    27 0.02497687 0.06164384
-    ## 4    complex event   148 0.13691027 0.33789954
-    ## 5       alt 5' UTR    26 0.02405180 0.05936073
-    ## 6    exon skipping   137 0.12673451 0.31278539
+    ##                     event count        prop  prop.sqtl
+    ## 1  Complex splicing event   188 0.158116064 0.40780911
+    ## 2           Tandem 5' UTR    84 0.070647603 0.18221258
+    ## 3 Mutually exclusive exon     8 0.006728343 0.01735358
+    ## 4      Alternative 3' UTR    34 0.028595458 0.07375271
+    ## 5        Complex 3' event   224 0.188393608 0.48590022
+    ## 6        Complex 5' event   283 0.238015139 0.61388286
 
 ``` r
 library(ggplot2)
@@ -186,3 +186,48 @@ Appendix
 Here is an illustration of the different events we consider:
 
 ![Splicing events classification](splicingEventsClassification.png)
+
+R session
+---------
+
+``` r
+sessionInfo()
+```
+
+    ## R version 3.2.3 (2015-12-10)
+    ## Platform: x86_64-apple-darwin13.4.0 (64-bit)
+    ## Running under: OS X 10.10.5 (Yosemite)
+    ## 
+    ## locale:
+    ## [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
+    ## 
+    ## attached base packages:
+    ## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+    ## [8] methods   base     
+    ## 
+    ## other attached packages:
+    ##  [1] ggplot2_2.0.0        dplyr_0.4.3          GenomicRanges_1.22.3
+    ##  [4] GenomeInfoDb_1.6.1   IRanges_2.4.6        S4Vectors_0.8.7     
+    ##  [7] AnnotationHub_2.2.3  BiocGenerics_0.16.1  sQTLseekeR_2.1      
+    ## [10] rmarkdown_0.9.2     
+    ## 
+    ## loaded via a namespace (and not attached):
+    ##  [1] Rcpp_0.12.3                  plyr_1.8.3                  
+    ##  [3] compiler_3.2.3               BiocInstaller_1.20.1        
+    ##  [5] formatR_1.2.1                XVector_0.10.0              
+    ##  [7] tools_3.2.3                  zlibbioc_1.16.0             
+    ##  [9] digest_0.6.9                 gtable_0.1.2                
+    ## [11] RSQLite_1.0.0                evaluate_0.8                
+    ## [13] shiny_0.13.0                 DBI_0.3.1                   
+    ## [15] curl_0.9.4                   yaml_2.1.13                 
+    ## [17] httr_1.0.0                   stringr_1.0.0               
+    ## [19] knitr_1.12.3                 grid_3.2.3                  
+    ## [21] data.table_1.9.6             Biobase_2.30.0              
+    ## [23] R6_2.1.2                     AnnotationDbi_1.32.3        
+    ## [25] magrittr_1.5                 scales_0.3.0                
+    ## [27] htmltools_0.3                assertthat_0.1              
+    ## [29] colorspace_1.2-6             mime_0.4                    
+    ## [31] interactiveDisplayBase_1.8.0 xtable_1.8-0                
+    ## [33] httpuv_1.3.3                 labeling_0.3                
+    ## [35] stringi_1.0-1                munsell_0.4.2               
+    ## [37] lazyeval_0.1.10              chron_2.3-47
