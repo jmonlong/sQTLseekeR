@@ -97,7 +97,7 @@ Now let's pick randomly a thousand genes, and for each gene pick two transcripts
 gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
 gene.tr = as.data.frame(subset(gene.tr, gene_id %in% sample(unique(gene_id),1000)))
 tr.df = gene.tr %>% group_by(gene_id) %>% mutate(transcript_id=sample(transcript_id)) %>%
-  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2]) %>% filter(tr.first!=tr.second)
+  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2], nb.tr=n()) %>% filter(nb.tr>1)
 ```
 
 At this point we are ready, we have our two *data.frames*:
@@ -106,10 +106,11 @@ At this point we are ready, we have our two *data.frames*:
 str(tr.df)
 ```
 
-    ## Classes 'tbl_df', 'tbl' and 'data.frame':    461 obs. of  3 variables:
-    ##  $ gene_id  : chr  "ENSG00000000457.8" "ENSG00000001461.11" "ENSG00000002919.9" "ENSG00000003989.12" ...
-    ##  $ tr.first : chr  "ENST00000367772.4" "ENST00000428131.1" "ENST00000393405.1" "ENST00000004531.10" ...
-    ##  $ tr.second: chr  "" "" "ENST00000359238.2" "ENST00000398090.3" ...
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    442 obs. of  4 variables:
+    ##  $ gene_id  : chr  "ENSG00000003989.12" "ENSG00000005249.6" "ENSG00000005486.10" "ENSG00000006025.6" ...
+    ##  $ tr.first : chr  "ENST00000398090.3" "ENST00000539794.1" "ENST00000318622.4" "ENST00000007414.2" ...
+    ##  $ tr.second: chr  "ENST00000004531.10" "ENST00000543645.1" "ENST00000413229.2" "ENST00000392507.3" ...
+    ##  $ nb.tr    : int  2 2 2 2 2 2 2 2 3 2 ...
 
 ``` r
 str(tr.str)
@@ -135,27 +136,27 @@ Now each transcript pair is annotated with an event code and name.
 head(ev.l$res)
 ```
 
-    ##              gene_id           tr.first         tr.second
-    ## 1  ENSG00000000457.8  ENST00000367772.4                  
-    ## 2 ENSG00000001461.11  ENST00000428131.1                  
-    ## 3 ENSG00000003989.12 ENST00000004531.10 ENST00000398090.3
-    ## 4  ENSG00000071655.9  ENST00000156825.1 ENST00000434436.1
-    ## 5  ENSG00000213999.7  ENST00000162023.5 ENST00000444486.2
-    ## 6  ENSG00000064545.8  ENST00000162044.7 ENST00000450333.2
-    ##                                              classCode
-    ## 1                                                 <NA>
-    ## 2                                                 <NA>
-    ## 3                                            1-2^,3-4^
-    ## 4                            2^,1^;<>,(2-,(1-;<>,,1^2-
-    ## 5 1-2^,;1^),2^);<>,(2-,(1-;<>,1-2^3-4^,;<>,1-2^),3-4^)
-    ## 6                      1-2^3-4^,;<>,(2-,(1-;<>,1^),2^)
-    ##                                                                              classEvent
-    ## 1                                                                                  <NA>
-    ## 2                                                                                  <NA>
-    ## 3                                                               Mutually exclusive exon
-    ## 4                       Alternative 3' splice site;Complex splicing event;Tandem 5' UTR
-    ## 5 Alternative 3' UTR;Complex 3' event;Complex splicing event;Skipped exon;Tandem 5' UTR
-    ## 6                                    Complex splicing event;Tandem 3' UTR;Tandem 5' UTR
+    ##              gene_id          tr.first          tr.second nb.tr
+    ## 1 ENSG00000003989.12 ENST00000398090.3 ENST00000004531.10     2
+    ## 2  ENSG00000006025.6 ENST00000007414.2  ENST00000392507.3     2
+    ## 3  ENSG00000070526.9 ENST00000156626.6  ENST00000359088.4     2
+    ## 4  ENSG00000071655.9 ENST00000156825.1  ENST00000434436.1     2
+    ## 5  ENSG00000068097.8 ENST00000393017.4  ENST00000184956.5     2
+    ## 6 ENSG00000082438.10 ENST00000392717.2  ENST00000194871.6     2
+    ##                                                                      classCode
+    ## 1                                                                    1-2^,3-4^
+    ## 2                                                    <>,(2-,(1-;<>,4^),1^2-3^)
+    ## 3                                    1-2^,;2^3-4^),1^);<>,(1-,(2-;<>,4-,1-2^3-
+    ## 4                                                    2^,1^;<>,(2-,(1-;<>,,1^2-
+    ## 5 (1-2^3-4^5-8^10-,(6-7^9-;2^3-4^5-6^7-,1^8-;<>,(1-3^,(2-4^5-6^7-8^;<>,2^),1^)
+    ## 6                                (1-,(2-;1-2^,;1-,2-;<>,(1-2^,(3-4^;<>,1^),2^)
+    ##                                                                                  classEvent
+    ## 1                                                                   Mutually exclusive exon
+    ## 2                                                            Complex 3' event;Tandem 5' UTR
+    ## 3                        Complex 3' event;Complex splicing event;Skipped exon;Tandem 5' UTR
+    ## 4                           Alternative 3' splice site;Complex splicing event;Tandem 5' UTR
+    ## 5                                     Complex 5' event;Complex splicing event;Tandem 3' UTR
+    ## 6 Alternative 5' splice site;Alternative 5' UTR;Complex 5' event;Skipped exon;Tandem 3' UTR
 
 There is also a summary *data.frame*. Here *count* (*prop*) represents the number (proportion) of time an event is observed relative to the other events. However *prop.sqtl* represents the proportion of sQTLs (or input pairs) that contain each event. These numbers are different because one sQTL (or transcript pair) can involve several events.
 
@@ -166,12 +167,12 @@ head(ev.l$stats)
 ```
 
     ##                     event count        prop  prop.sqtl
-    ## 1  Complex splicing event   188 0.158116064 0.40780911
-    ## 2           Tandem 5' UTR    84 0.070647603 0.18221258
-    ## 3 Mutually exclusive exon     8 0.006728343 0.01735358
-    ## 4      Alternative 3' UTR    34 0.028595458 0.07375271
-    ## 5        Complex 3' event   224 0.188393608 0.48590022
-    ## 6        Complex 5' event   283 0.238015139 0.61388286
+    ## 1 Mutually exclusive exon     7 0.006329114 0.01583710
+    ## 2        Complex 5' event   264 0.238698011 0.59728507
+    ## 3        Intron retention    28 0.025316456 0.06334842
+    ## 4           Tandem 3' UTR   108 0.097649186 0.24434389
+    ## 5        Complex 3' event   206 0.186256781 0.46606335
+    ## 6           Tandem 5' UTR    76 0.068716094 0.17194570
 
 ``` r
 library(ggplot2)

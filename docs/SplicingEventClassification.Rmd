@@ -88,7 +88,7 @@ Now let's pick randomly a thousand genes, and for each gene pick two transcripts
 gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
 gene.tr = as.data.frame(subset(gene.tr, gene_id %in% sample(unique(gene_id),1000)))
 tr.df = gene.tr %>% group_by(gene_id) %>% mutate(transcript_id=sample(transcript_id)) %>%
-  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2]) %>% filter(tr.first!=tr.second)
+  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2], nb.tr=n()) %>% filter(nb.tr>1)
 ```
 
 At this point we are ready, we have our two *data.frames*:
