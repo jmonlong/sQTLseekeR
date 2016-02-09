@@ -120,6 +120,7 @@ library(ggplot2)
 ggplot(ev.l$stats, aes(x=event, y=prop.sqtl)) + geom_bar(stat="identity") + coord_flip() + ylab("proportion of transcript pairs")
 ```
 
+
 ## Appendix
 
 Here is an illustration of the different events we consider:
