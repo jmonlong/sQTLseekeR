@@ -159,5 +159,8 @@ classify.events <- function(df, trans.struct){
   df = merge(df,class.df,all.x=TRUE)
   df$trPair = NULL
 
+  ## Order events
+  class.stats$event = factor(class.stats$event, levels=sort(unique(as.character(class.stats$event)), decreasing=TRUE))
+
   return(list(res=df, stats=class.stats))
 }
