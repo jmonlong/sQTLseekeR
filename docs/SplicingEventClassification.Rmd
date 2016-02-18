@@ -62,52 +62,55 @@ It found *Mutually exclusive exons* between transcript *t1* and *t2*. Transcript
 
 In practice the input is a larger *data.frame* with information about each sQTL, including the relevant columns *tr.first* and *tr.second*. These two columns contains the IDs of the two transcripts whose relative expression change the most.
 
-In the next example, we import the transcript structure for some genes, select two random transcripts in each gene and compute the corresponding splicing event.
+In the next example, we start by constructing the transcript structure for some genes from Gencode annotation V12, available [here](http://www.gencodegenes.org/releases/12.html).
 
-First we need to load a transcript annotation and build the transcript structure *data.frame*. In practice, you should use the same annotation file that for the other steps of the project (mapping/transcript quantification). For this tutorial, we use *AnnotationHub* package to quickly retrieve an annotation and prepare the data. If you are working with a GTF file, import it and try to do something similar.
+First we download the file and read it.
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+download.file("ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_12/gencode.v12.annotation.gtf.gz","../Data/gencode.v12.annotation.gtf.gz")
+gtf = read.table("../Data/gencode.v12.annotation.gtf.gz", as.is=TRUE, sep="\t")
+colnames(gtf) = c("chr","source","type","start","end","score","strand","score2","info")
+```
 
-```{r, message=FALSE, warning=FALSE}
-library(AnnotationHub)
-ah = AnnotationHub()
-genc.gr = ah[["AH49010"]]
-genc.gr = subset(genc.gr, gene_type=="protein_coding" & source=="ENSEMBL")
-concat <- function(x) paste(x, collapse=",")
+Then for each transcript with CDS or UTRs, we concatenate the start/end positions.
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 library(dplyr)
-cds.gr = subset(genc.gr, type=="CDS")
-cds.str = data.frame(transId=cds.gr$transcript_id, st=start(cds.gr), end=end(cds.gr), strand=strand(cds.gr)) %>%
-  group_by(transId, strand) %>% summarize(cdsStarts=concat(st), cdsEnds=concat(end))
-utr.gr = subset(genc.gr, type=="UTR")
-utr.str = data.frame(transId=utr.gr$transcript_id, st=start(utr.gr), end=end(utr.gr), strand=strand(utr.gr)) %>%
-  group_by(transId, strand) %>% summarize(utrStarts=concat(st), utrEnds=concat(end))
-tr.str = merge(cds.str, utr.str)
+concat <- function(x) paste(x, collapse=",")
+trans.str = gtf %>% filter(type %in% c("CDS","UTR")) %>%
+    mutate(transId=gsub(".*transcript_id ([^;]+);.*","\\1",info),
+           geneId=gsub(".*gene_id ([^;]+);.*","\\1",info)) %>%
+        group_by(transId, geneId, strand) %>%
+            summarize(cdsStarts=concat(start[type=="CDS"]),
+                      cdsEnds=concat(end[type=="CDS"]),
+                      utrStarts=concat(start[type=="UTR"]),
+                      utrEnds=concat(end[type=="UTR"]))
 ```
 
-Now let's pick randomly a thousand genes, and for each gene pick two transcripts. We remove genes with only one transcript.
+For transcripts without CDS, we use the *exon* annotation instead. This is optional and not necessary if you analyze only protein-coding genes.
 
-```{r, message=FALSE, warning=FALSE}
-gene.tr = unique(mcols(subset(genc.gr, type=="transcript"))[,c("gene_id","transcript_id")])
-gene.tr = as.data.frame(subset(gene.tr, gene_id %in% sample(unique(gene_id),1000)))
-tr.df = gene.tr %>% group_by(gene_id) %>% mutate(transcript_id=sample(transcript_id)) %>%
-  summarize(tr.first=transcript_id[1], tr.second=transcript_id[2], nb.tr=n()) %>% filter(nb.tr>1)
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
+exon.str = gtf %>% filter(type=="exon") %>%
+    mutate(transId=gsub(".*transcript_id ([^;]+);.*","\\1",info),
+           geneId=gsub(".*gene_id ([^;]+);.*","\\1",info)) %>%
+        filter(!(transId %in% trans.str$transId)) %>%
+            group_by(transId, geneId, strand) %>%
+                summarize(cdsStarts=concat(start),cdsEnds=concat(end),
+                          utrStarts=NA, utrEnds=NA)
+trans.str = rbind(trans.str, exon.str)
 ```
 
-At this point we are ready, we have our two *data.frames*:
+Now we read the sQTLs from one population, CEU. After erasing the event classification, we  recompute them using `classify.events`.
 
 ```{r, message=FALSE, warning=FALSE}
-str(tr.df)
-str(tr.str)
+sqtl.df = read.table("../Data/sQTLs-FDR10-CEU.tsv.gz", as.is=TRUE, header=TRUE, sep="\t", quote="")
+sqtl.df$classCode = sqtl.df$classEvent = NULL
+ev.sqtls = classify.events(sqtl.df, trans.str)
 ```
 
-Same as before, we run:
+The annotated results is visible in
 
 ```{r, message=FALSE, warning=FALSE}
-ev.l = classify.events(tr.df, tr.str)
-```
-
-Now each transcript pair is annotated with an event code and name.
-
-```{r, message=FALSE, warning=FALSE}
-head(ev.l$res)
+head(ev.sqtls$res)
 ```
 
 There is also a summary *data.frame*. Here *count* (*prop*) represents the number (proportion) of time an event is observed relative to the other events. However *prop.sqtl* represents the proportion of sQTLs (or input pairs) that contain each event. These numbers are different because one sQTL (or transcript pair) can involve several events.
@@ -115,9 +118,37 @@ There is also a summary *data.frame*. Here *count* (*prop*) represents the numbe
 This summary *data.frame* is useful to plot the global distribution of the events.
 
 ```{r, message=FALSE, warning=FALSE}
-head(ev.l$stats)
+head(ev.sqtls$stats)
 library(ggplot2)
-ggplot(ev.l$stats, aes(x=event, y=prop.sqtl)) + geom_bar(stat="identity") + coord_flip() + ylab("proportion of transcript pairs")
+ggplot(ev.sqtls$stats, aes(x=event, y=prop.sqtl)) + geom_bar(stat="identity") + coord_flip() + ylab("proportion of sQTLs")
+```
+
+## Null distribution
+
+It's good to know the general distribution of the splicing events affected by sQTLs but we might wonder what type of events happen in general. To investigate this null distribution we can pick two random transcripts in each the same genes that are affected by sQTLs and see what type of events differentiate them.
+
+```{r, message=FALSE, warning=FALSE}
+## Function that picks two random transcripts for an input gene
+geneToTrans = tapply(trans.str$transId, trans.str$geneId, identity)
+pickRandomTrans <- function(gene) head(c(sample(geneToTrans[[gene]]),NA, NA),2)
+## Build a data.frame with the random transcript pairs
+cont.pairs = sapply(sqtl.df$geneId, pickRandomTrans)
+cont.pairs = as.data.frame(t(cont.pairs))
+colnames(cont.pairs) = c("tr.first","tr.second")
+```
+
+Once these control transcript pairs are ready, we run the classifier.
+
+```{r, message=FALSE, warning=FALSE}
+ev.cont = classify.events(cont.pairs, trans.str)
+```
+
+Now, we can merge this results with the sQTLs' ones and compare the distributions.
+
+```{r, message=FALSE, warning=FALSE}
+stats.df = rbind(data.frame(set="sQTLs", ev.sqtls$stats),
+    data.frame(set="Control", ev.cont$stats))
+ggplot(stats.df, aes(x=event, y=prop.sqtl, fill=set)) + geom_bar(stat="identity", position="dodge") + coord_flip() + ylab("proportion of sQTLs")
 ```
 
 

@@ -29,6 +29,7 @@
 ##'
 classify.events <- function(df, trans.struct){
   ## Convert to character in case
+  trans.struct = as.data.frame(trans.struct)
   for(col in colnames(trans.struct)){
     trans.struct[,col] = as.character(trans.struct[,col])
   }
@@ -70,6 +71,7 @@ classify.events <- function(df, trans.struct){
   classify.pair <- function(tr1 = "ENST00000451283.1",tr2 = "ENST00000215882.5"){
     ## Compute event code from two sets of positions.
     find.events <- function(tr1.pos,tr2.pos,check.5p=FALSE,check.3p=FALSE,posStrand=TRUE){
+      if(any(is.na(c(tr1.pos, tr2.pos)))) return(NULL)
       pos.df = data.frame(pos=sort(unique(c(tr1.pos,tr2.pos)),decreasing=!posStrand))
       pos.df$tr1 = pos.df$pos %in% tr1.pos
       pos.df$tr2 = pos.df$pos %in% tr2.pos
