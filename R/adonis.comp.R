@@ -42,9 +42,9 @@ adonis.comp <- function(dis,groups,permutations=99,f.perms=FALSE,svQTL=FALSE,app
                     n = ncol(dist)
                     eigenStats <- c(length (e), sum(e>0), sum(e<0))
                     if (eigenStats[3]>0)  e <- abs(e) 
-                    randomChisqN <- matrix(rchisq(nb.mont*eigenStats[1],df=nb.gp-1),
+                    randomChisqN <- matrix(stats::rchisq(nb.mont*eigenStats[1],df=nb.gp-1),
                                            nrow=eigenStats[1],ncol=nb.mont)
-                    randomChisqD <- matrix(rchisq(nb.mont*eigenStats[1],df=n-nb.gp),
+                    randomChisqD <- matrix(stats::rchisq(nb.mont*eigenStats[1],df=n-nb.gp),
                                            nrow=eigenStats[1],ncol=nb.mont)
                     asymptNume   <- e %*% randomChisqN 
                     asymptDeno   <- e %*% randomChisqD 

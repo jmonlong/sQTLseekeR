@@ -22,17 +22,18 @@ compFscore <- function(geno.df, tre.dist, tre.df,svQTL=FALSE){
     stop("No common samples between genotype and transcript ratios.")
   }
   
-  geno.snp = geno.df[,labels(tre.dist)]
+  geno.snp = as.numeric(geno.df[,labels(tre.dist)])
+  names(geno.snp) = labels(tre.dist)
   if(any(geno.snp==-1)){
     non.na = geno.snp > -1
     geno.snp = geno.snp[non.na]
-    tre.dist = as.dist(as.matrix(tre.dist)[non.na, non.na])
+    tre.dist = stats::as.dist(as.matrix(tre.dist)[non.na, non.na])
   }
   groups.snp.f = factor(as.numeric(geno.snp))
   F.snp = adonis.comp(tre.dist,groups.snp.f,permutations=2,svQTL=FALSE)
   mdt = md.trans(tre.df, groups.snp.f, labels(tre.dist))
   res.df = data.frame(F=F.snp,
-      nb.groups=nlevels(groups.snp.f) ,
+      nb.groups=nlevels(groups.snp.f),
       md=mdt$md,
       tr.first=mdt$tr.first,
       tr.second=mdt$tr.second,

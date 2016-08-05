@@ -14,7 +14,7 @@ index.genotype <- function(file){
   }
 
   ## Check column names and order
-  snp50 = read.table(file, sep="\t", header=TRUE, quote="", comment.char = "", as.is=TRUE, nrows=50)
+  snp50 = utils::read.table(file, sep="\t", header=TRUE, quote="", comment.char = "", as.is=TRUE, nrows=50)
   if(!all(colnames(snp50)[1:4] == c("chr","start","end","snpId"))){
     stop("Missing column or in incorrect order. The first 4 columns must be 'chr', 'start', 'end' and 'snpId'.")
   }

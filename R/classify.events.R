@@ -151,7 +151,7 @@ classify.events <- function(df, trans.struct){
       data.frame()
     }
   }))
-  class.stats = aggregate(count~event,data=class.stats,sum)
+  class.stats = stats::aggregate(count~event,data=class.stats,sum)
   class.stats$prop = class.stats$count / sum(class.stats$count)
   class.stats$prop.sqtl = class.stats$count / nrow(tr.to.class)
   spl.count = sum(unlist(lapply(class.res,function(l)if(length(l$class.stats)>0) l$anySpl)))

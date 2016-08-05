@@ -16,17 +16,17 @@ permutest.betadisper <- function(x, pairwise = FALSE,
         n <- length(y)
         xbar <- mean(x) ## .Internal(mean(x))
         ybar <- mean(y) ## .Internal(mean(y))
-        xvar <- var(x)  ## .Internal(cov(x, NULL, 1, FALSE))
-        yvar <- var(y)  ## .Internal(cov(y, NULL, 1, FALSE))
+        xvar <- stats::var(x)  ## .Internal(cov(x, NULL, 1, FALSE))
+        yvar <- stats::var(y)  ## .Internal(cov(y, NULL, 1, FALSE))
         pooled <- sqrt(((m-1)*xvar + (n-1)*yvar) / (m+n-2))
         (xbar - ybar) / (pooled * sqrt(1/m + 1/n))
     }
     if(!inherits(x, "betadisper"))
         stop("Only for class \"betadisper\"")
     ## will issue error if only a single group
-    mod.aov <- anova(x)
+    mod.aov <- stats::anova(x)
     nobs <- length(x$distances)
-    mod <- lm(x$distances ~ x$group)
+    mod <- stats::lm(x$distances ~ x$group)
     mod.Q <- mod$qr
     p <- mod.Q$rank
     resids <- qr.resid(mod.Q, x$distances)
@@ -35,10 +35,10 @@ permutest.betadisper <- function(x, pairwise = FALSE,
     ## pairwise comparisons
     if(pairwise) {
         ## unique pairings
-        combin <- combn(levels(x$group), 2)
+        combin <- utils::combn(levels(x$group), 2)
         n.pairs <- ncol(combin)
         t.stats <- matrix(0, ncol = n.pairs, nrow = control$nperm + 1)
-        t.stats[1,] <- apply(combn(levels(x$group), 2), 2, function(z) {
+        t.stats[1,] <- apply(utils::combn(levels(x$group), 2), 2, function(z) {
             t.statistic(x$distances[x$group == z[1]],
                         x$distances[x$group == z[2]])})
     }
@@ -67,7 +67,7 @@ permutest.betadisper <- function(x, pairwise = FALSE,
         df <- apply(combin, 2, function(z) {
             length(x$distances[x$group == z[1]]) +
                 length(x$distance[x$group == z[2]]) - 2})
-        pairwise <- list(observed = 2 * pt(-abs(t.stats[1,]), df),
+        pairwise <- list(observed = 2 * stats::pt(-abs(t.stats[1,]), df),
                          permuted = apply(t.stats, 2,
                          function(z) sum(abs(z) >= abs(z[1]))/length(z)))
         names(pairwise$observed) <- names(pairwise$permuted) <-

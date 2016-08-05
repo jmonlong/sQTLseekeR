@@ -10,7 +10,7 @@ te.dispersion <-  function(d){
         if(any(na.ind <- is.na(diag(d)))){
             d = d[!na.ind,!na.ind]
         }
-        d = as.dist(d)
+        d = stats::as.dist(d)
     }
     bd = tryCatch(vegan::betadisper(d,rep(1,ncol(as.matrix(d)))),
         error = function(e)return(list(distances=0)))

@@ -28,7 +28,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE,
   res.df$qv = qvalue::qvalue(res.df$pv)$qvalues
 
   if(!is.null(out.pdf)){
-    pdf(out.pdf, 8,6)
+    grDevices::pdf(out.pdf, 8,6)
     suppressWarnings(print(ggplot2::ggplot(res.df, ggplot2::aes(x=pv)) +
           ggplot2::geom_histogram() + ggplot2::theme_bw() +
           ggplot2::xlab("P-value") + ggplot2::ylab("number of gene/SNP")
@@ -60,7 +60,7 @@ sqtls <- function(res.df, FDR=.01, md.min=.01, out.pdf=NULL, svQTL.removal=TRUE,
             ggplot2::scale_y_log10()
             ))
     }
-    dev.off()
+    grDevices::dev.off()
   }
   return(res.df)
 }

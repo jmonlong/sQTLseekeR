@@ -9,16 +9,32 @@ Monlong, J. et al. Identification of genetic variants associated with alternativ
 
 ### Installation
 
-To install the latest development version: `devtools::install_github("jmonlong/sQTLseekeR")`.
+First some [Bioconductor](http://bioconductor.org/) packages are required. They can be installed with :
 
-This requires `devtools` package (more information [here](https://github.com/hadley/devtools))
-which can be installed with `install.packages("devtools")`.
-
-Some [Bioconductor](http://bioconductor.org/) packages are also required. They can be installed with :
 ```
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("Rsamtools", "qvalue"))
+biocLite(c("vegan", "Rsamtools", "qvalue"))
 ```
+
+Then, install [`devtools` package](https://github.com/hadley/devtools).
+
+```
+install.packages("devtools")
+```
+
+Finally, install either the latest development version: 
+
+```
+devtools::install_github("jmonlong/sQTLseekeR")
+```
+
+Or a specific release: 
+
+```
+devtools::install_github("jmonlong/sQTLseekeR", ref="2.1")
+```
+
+All these installation commands are also written in `install.R` script (*source* it to install).
 
 **R 3.1 or higher** is required.
 

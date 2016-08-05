@@ -97,7 +97,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       ## Remove samples with non expressed genes
       tre.gene = tre.gene[,!is.na(tre.gene[1,])]
       ## Focus on common samples
-      genotype.headers = as.character(read.table(genotype.f, as.is=TRUE, nrows=1))
+      genotype.headers = as.character(utils::read.table(genotype.f, as.is=TRUE, nrows=1))
       com.samples = intersect(colnames(tre.gene),genotype.headers)
       tre.dist = hellingerDist(tre.gene[,com.samples])
 
@@ -116,6 +116,7 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
       }
       
       res.df = lapply(1:length(gr.gene.spl), function(ii){
+        res.range = data.frame()
         if(verbose){message("  Sub-range ",ii)}
         genotype.gene = read.bedix(genotype.f, gr.gene.spl[ii])
         if(verbose & is.null(genotype.gene)){message("    No SNPs in the genomic range.")}
@@ -128,18 +129,20 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
           }
           if(any(snps.to.keep=="PASS")){
             genotype.gene = genotype.gene[snps.to.keep=="PASS", ]
-            res.df = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
+            res.range = dplyr::do(dplyr::group_by(genotype.gene, snpId), compFscore(., tre.dist, tre.gene, svQTL=svQTL))
             ## res.df = lapply(unique(genotype.gene$snpId), function(snpId){
             ##   data.frame(snpId=snpId, compFscore(genotype.gene[which(genotype.gene$snpId==snpId),], tre.dist, tre.gene, svQTL=svQTL))
             ## })
             ## res.df = plyr::ldply(res.df)
           }
         }
-        return(res.df)
+        return(res.range)
       })
-      res.df = do.call(rbind, res.df)
+      range.done = which(unlist(lapply(res.df, nrow))>0)
       
-      if(nrow(res.df)>0){
+      if(length(range.done)>0){
+        res.df = res.df[range.done]
+        res.df = do.call(rbind, res.df)
         res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, approx=approx, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max))
         if(svQTL){
           res.df = dplyr::do(dplyr::group_by(res.df, nb.groups), compPvalue(., tre.dist, svQTL=TRUE, min.nb.ext.scores=min.nb.ext.scores, nb.perm.max=nb.perm.max.svQTL))
@@ -163,13 +166,14 @@ sqtl.seeker <- function(tre.df,genotype.f, gene.loc, genic.window=5e3, min.nb.ex
     return(data.frame(done=FALSE))
   }
 
-  ret.df = plyr::ldply(lapply(unique(tre.df$geneId), function(gene.i){
+  ret.df = lapply(unique(tre.df$geneId), function(gene.i){
     df = tre.df[which(tre.df$geneId==gene.i),]
     data.frame(geneId=gene.i, analyze.gene.f(df))
-  }))
-
-  if(any(ret.df$done)){
-    ret.df = ret.df[which(ret.df$done),]
+  })
+  done = which(unlist(lapply(ret.df, ncol))>2)
+  if(length(done)>0){
+    ret.df = ret.df[done]
+    ret.df = do.call(rbind, ret.df)
     ret.df$done=NULL
     return(ret.df)
   } else {
