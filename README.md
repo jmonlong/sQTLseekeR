@@ -34,7 +34,7 @@ Or a specific release:
 devtools::install_github("jmonlong/sQTLseekeR", ref="2.1")
 ```
 
-All these installation commands are also written in `install.R` script (*source* it to install).
+All these installation commands are also written in `install.R` script (*source* it to install). These commands work for R 3.2 or higher. For R 3.1, some packages need their older version (see `installOnR.3.1.R`).
 
 **R 3.1 or higher** is required.
 
