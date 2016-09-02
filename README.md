@@ -7,6 +7,8 @@ For more information about the method and performance see article :
 Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun.
 5:4698 doi: [10.1038/ncomms5698](http://www.nature.com/ncomms/2014/140820/ncomms5698/full/ncomms5698.html) (2014).
 
+**sQTLseekeR is now maintained at [guigolab/sQTLseekeR](https://github.com/guigolab/sQTLseekeR).**
+
 ### Installation
 
 First some [Bioconductor](http://bioconductor.org/) packages are required. They can be installed with :
