@@ -1,13 +1,13 @@
 sQTLseekeR
 ==========
 
+## sQTLseekeR is now maintained at [guigolab/sQTLseekeR](https://github.com/guigolab/sQTLseekeR)
+
 sQTLseekeR is a R package to detect splicing QTLs (sQTLs), which are variants associated with change in the splicing pattern of a gene. Here, splicing patterns are modeled by the relative expression of the transcripts of a gene.
 
 For more information about the method and performance see article :
 Monlong, J. et al. Identification of genetic variants associated with alternative splicing using sQTLseekeR. Nat. Commun.
 5:4698 doi: [10.1038/ncomms5698](http://www.nature.com/ncomms/2014/140820/ncomms5698/full/ncomms5698.html) (2014).
-
-**sQTLseekeR is now maintained at [guigolab/sQTLseekeR](https://github.com/guigolab/sQTLseekeR).**
 
 ### Installation
 
