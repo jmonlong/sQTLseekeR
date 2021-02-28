@@ -24,6 +24,6 @@ index.genotype <- function(file){
   }
   
   file.final = Rsamtools::bgzip(file, dest=paste0(sub(".gz","",file),".bgz"),overwrite=TRUE)
-  Rsamtools::indexTabix(file.final, format="bed")
+  Rsamtools::indexTabix(file.final, format="bed",skip=1L)
   return(file.final)
 }
